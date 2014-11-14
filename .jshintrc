@@ -4,6 +4,7 @@
   "indent": 2,
   "quotmark": "single",
   "camelcase": true,
+  "eqeqeq": true,
   "predef": [
     "define", "require", "exports", "module",
     "window", "document", "setTimeout", "clearTimeout",
