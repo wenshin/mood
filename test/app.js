@@ -1,30 +1,35 @@
+/* global require, setInterval, document */
+
 require.config({
-  baseUrl: "../src",
+  baseUrl: '../src',
   waitSeconds: 15
 });
 
 require( ['mood'], function(mood) {
   'use strict';
 
+  // debug is true will print the info in console
+  mood.Mood.config({ debug: false });
+
   var app = new mood.Mood();
 
-  app.createScope('v123', {
+  app.createScope('test', {
       name: '',
       test: 0,
-      is_right: true
+      isRight: true
     },
 
     function(scope) {
       var i = 0;
       setInterval(function() {
         scope.test = i;
-        scope.name = 'wenshin' + i;
+        scope.name = ', wenshin' + i;
         i++;
       }, 1000);
     },
 
     function(scope) {
-      document.getElementById('123').innerHTML = scope.name + scope.test;
+      document.getElementById('123').innerHTML = scope.test + scope.name;
     }
   );
 });
