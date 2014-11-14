@@ -28,7 +28,7 @@ define(function (require, exports, module) {
   Mood.config = function(option) {
     for ( var p in option ) {
       if ( option.hasOwnProperty(p) ) {
-        Mood._config = option[p];
+        Mood._config[p] = option[p];
       }
     }
     Log.debug = Mood._config.debug;
