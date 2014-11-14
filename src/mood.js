@@ -44,7 +44,7 @@
     }
   };
   // 函数节流，见JavaScript高级编程22.3节
-  Utils.tr = function(func) {
+  Utils.Processor = function(func) {
     this.timeId = null;
     this.processor = func;
   };
