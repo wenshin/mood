@@ -1,0 +1,13 @@
+{
+  "undef": true,
+  "unused": true,
+  "indent": 2,
+  "quotmark": "single",
+  "camelcase": true,
+  "predef": [
+    "define", "require", "exports", "module",
+    "window", "document", "setTimeout", "clearTimeout",
+    "clearInterval", "setTimeout", "setInterval",
+    "console"
+  ]
+}
