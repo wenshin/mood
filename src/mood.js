@@ -56,7 +56,7 @@
       upper.processor.apply(context, args);
       Utils.Log.print('run a hook', 'log');
     }, 10);
-  }
+  };
 
 
   var Type = Utils.Type;
@@ -78,7 +78,7 @@
     var _hooks = [];
     hooks.forEach(function(hook) {
       _hooks.push(new Processor(hook));
-    });;
+    });
     this._hooks[hookName] = savedHooks.concat(_hooks);
     this._scopes[hookName] = scope;
   };
@@ -113,7 +113,7 @@
         Log.print([hookName, ' Error: hook must be a Function'], 'error');
       }
     });
-  }
+  };
 
   Hook.getAllHookNames = function(name) {
     var names = ChainName.resolve(name);
@@ -230,7 +230,7 @@
   };
 
   Mood._config = {
-    debug: false;
+    debug: false
   };
 
   Mood.config = function(option) {
