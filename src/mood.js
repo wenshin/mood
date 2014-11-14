@@ -5,12 +5,15 @@
 ({ define: typeof define === 'function'
   ? define  // browser require.js
   : function(F) { F(require,exports,module); } }).  // Node.js
-define(function (require, exports, module) {
+define(function (require, exports) {
   'use strict';
 
   var scope = require('./scope');
   var hook = require('./hook');
   var utils = require('./utils');
+
+  // When brower this is window, when node.js this is null
+  var win = this;
 
   var Type = utils.Type;
   var Log = utils.Log;
@@ -64,7 +67,7 @@ define(function (require, exports, module) {
       contrs = [contrs];
     }
     contrs.forEach(function(contr) {
-      contr.call(window, scope);
+      contr.call(win, scope);
     });
   };
 

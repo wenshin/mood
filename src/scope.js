@@ -1,7 +1,7 @@
 ({ define: typeof define === 'function'
   ? define  // browser require.js
   : function(F) { F(require,exports,module); } }).  // Node.js
-define(function (require, exports, module) {
+define(function (require, exports) {
 
   'use strict';
 

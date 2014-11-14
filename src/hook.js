@@ -1,7 +1,7 @@
 ({ define: typeof define === 'function'
   ? define  // browser require.js
   : function(F) { F(require,exports,module); } }).  // Node.js
-define(function (require, exports, module) {
+define(function (require, exports) {
 
   'use strict';
 
@@ -17,7 +17,7 @@ define(function (require, exports, module) {
   };
 
   Hook.prototype.add = function(scope, hooks) {
-    // <param scope>: hook in hooks will call hook.call(this, scope)
+    // <param scope>: hook in hooks will call hook.call(win, scope)
     // <param hooks>: must be a Array
     var hookName = scope.getName();
     var savedHooks = this._hooks[hookName] || [];
@@ -40,7 +40,6 @@ define(function (require, exports, module) {
 
   // 运行this._hooks中单个属性对应的hook 队列
   Hook.prototype.runSingle = function(hookName) {
-    var upper = this;
     var hooks = this._hooks[hookName];
     var scope = this._scopes[hookName];
     if ( !hooks ) {
