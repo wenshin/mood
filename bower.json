@@ -1,0 +1,28 @@
+{
+  "name": "mood",
+  "version": "0.0.1",
+  "homepage": "www.hiyuanwen.com",
+  "authors": [
+    "yuanwen"
+  ],
+  "description": "A tiny binding library",
+  "main": "mood.js",
+  "moduleType": [
+    "amd"
+  ],
+  "keywords": [
+    "js",
+    "framework"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "requirejs": "~2.1.15"
+  }
+}
