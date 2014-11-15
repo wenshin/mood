@@ -9,5 +9,8 @@ exports.Type = {
   },
   isArray: function(v) {
     return v instanceof Array;
+  },
+  toArray: function(objs) {
+    if ( !this.isArray(objs) ) { return [objs]; }
   }
 };

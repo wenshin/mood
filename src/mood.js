@@ -30,9 +30,15 @@ Mood.config = function(option) {
 Mood.prototype.initScope = function(name, schema, controllers, hooks) {
   // <params schema>: is a Object or model structure
   var scope = this.addScope(name, schema);
+
   // Must before controller
-  this.bindHooks(scope, hooks);
-  this.initControllers(scope, controllers);
+  hooks = Type.toArray(hooks);
+  this.hookManager.add(scope, hooks);
+
+  controllers = Type.toArray(controllers);
+  controllers.forEach(function(controller) {
+    controller.call(null, scope);
+  });
 };
 
 Mood.prototype.getScope = function(name) {
@@ -42,22 +48,6 @@ Mood.prototype.getScope = function(name) {
 Mood.prototype.addScope = function(name, schema) {
   this.rootScope.addProp(name, schema);
   return this.rootScope[name];
-};
-
-Mood.prototype.bindHooks = function(scope, hooks) {
-  if ( Type.isFunction(hooks) ) {
-    hooks = [hooks];
-  }
-  this.hookManager.add(scope, hooks);
-};
-
-Mood.prototype.initControllers = function(scope, contrs) {
-  if ( Type.isFunction(contrs) ) {
-    contrs = [contrs];
-  }
-  contrs.forEach(function(contr) {
-    contr.call(this, scope);
-  });
 };
 
 exports.Mood = Mood;
