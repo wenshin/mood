@@ -2,14 +2,17 @@
 module.exports = function(grunt) {
   'use strict';
 
-  var modulePrefix = grunt.file.read('src/module.prefix');
-  var moduleSuffix = grunt.file.read('src/module.suffix');
+  var srcPath = 'src/';
+  var distPath = 'dist/';
+
+  var modulePrefix = grunt.file.read(srcPath + 'module.prefix');
+  var moduleSuffix = grunt.file.read(srcPath + 'module.suffix');
 
   function moodSrcFiles() {
     var config = {};
-    var filePaths = grunt.file.expand('src/**/*.js');
+    var filePaths = grunt.file.expand(srcPath + '**/*.js');
     filePaths.forEach(function(filePath) {
-      config[filePath] = filePath;
+      config[filePath.replace(srcPath, distPath)] = filePath;
     });
     return config;
   }
@@ -29,7 +32,7 @@ module.exports = function(grunt) {
         banner: '<%= banner %>',
         stripBanners: true
       },
-      mood: {
+      build: {
         options: {
           banner: modulePrefix,
           footer: moduleSuffix
@@ -65,7 +68,7 @@ module.exports = function(grunt) {
       gruntfile: {
         src: 'Gruntfile.js'
       },
-      lib_test: {
+      libtest: {
         src: ['lib/**/*.js', 'test/**/*.js']
       }
     },
@@ -77,9 +80,9 @@ module.exports = function(grunt) {
         files: '<%= jshint.gruntfile.src %>',
         tasks: ['jshint:gruntfile']
       },
-      lib_test: {
-        files: '<%= jshint.lib_test.src %>',
-        tasks: ['jshint:lib_test', 'qunit']
+      libtest: {
+        files: '<%= jshint.libtest.src %>',
+        tasks: ['jshint:libtest', 'qunit']
       }
     }
   });
