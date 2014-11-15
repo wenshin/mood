@@ -9,11 +9,11 @@ require( ['mood'], function(mood) {
   'use strict';
 
   // debug is true will print the info in console
-  mood.Mood.config({ debug: false });
+  mood.Mood.config({ debug: true });
 
-  var app = new mood.Mood();
+  var app = new mood.Mood('myapp');
 
-  app.createScope('test', {
+  app.initScope('myscope', {
       name: '',
       test: 0,
       isRight: true
