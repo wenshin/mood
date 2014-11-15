@@ -5,12 +5,12 @@ var Processor = require('./utils/processor').Processor;
 var ChainName = require('./utils/chainame').ChainName;
 
 // 支持a.b.c的属性名，直接使用a的Hooks
-var Hook = function() {
+var Manager = function() {
   this._hooks = {};
   this._scopes = {};
 };
 
-Hook.prototype.add = function(scope, hooks) {
+Manager.prototype.add = function(scope, hooks) {
   // <param scope>: hook in hooks will call hook.call(win, scope)
   // <param hooks>: must be a Array
   var hookName = scope.getName();
@@ -24,16 +24,16 @@ Hook.prototype.add = function(scope, hooks) {
 };
 
 // 传入链式名称‘abc.bcd.dd’，解析所有要运行的hook
-Hook.prototype.run = function(name){
+Manager.prototype.run = function(name){
   var upper = this;
-  var hookNames = Hook.getAllHookNames(name);
+  var hookNames = Manager.getAllHookNames(name);
   hookNames.forEach(function(hookName) {
     upper.runSingle(hookName);
   });
 };
 
 // 运行this._hooks中单个属性对应的hook 队列
-Hook.prototype.runSingle = function(hookName) {
+Manager.prototype.runSingle = function(hookName) {
   var hooks = this._hooks[hookName];
   var scope = this._scopes[hookName];
   if ( !hooks ) {
@@ -54,7 +54,7 @@ Hook.prototype.runSingle = function(hookName) {
   });
 };
 
-Hook.getAllHookNames = function(name) {
+Manager.getAllHookNames = function(name) {
   var names = ChainName.resolve(name);
   var _names = [];
   // reduce要注意加initial值和不加的区别
@@ -67,4 +67,4 @@ Hook.getAllHookNames = function(name) {
   return _names;
 };
 
-exports.Hook = Hook;
+exports.Manager = Manager;
