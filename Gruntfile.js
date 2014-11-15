@@ -8,7 +8,10 @@ module.exports = function(grunt) {
   var modulePrefix = grunt.file.read(srcPath + 'module.prefix');
   var moduleSuffix = grunt.file.read(srcPath + 'module.suffix');
 
-  function moodSrcFiles() {
+  function mapSrc2DistPath(srcPath, distPath) {
+    // Generate a grunt 'files' format src and dist mapping config from a directory
+    // e.g.
+    // { 'dist/test.js': 'src/test.js', 'dist/test1.js': 'src/test1.js' }
     var config = {};
     var filePaths = grunt.file.expand(srcPath + '**/*.js');
     filePaths.forEach(function(filePath) {
@@ -37,7 +40,7 @@ module.exports = function(grunt) {
           banner: modulePrefix,
           footer: moduleSuffix
         },
-        files: moodSrcFiles()
+        files: mapSrc2DistPath(srcPath, distPath)
       }
     },
     uglify: {
