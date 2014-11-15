@@ -1,7 +1,7 @@
 /* global require, setInterval, document */
 
 require.config({
-  baseUrl: '../src',
+  baseUrl: '../dist',
   waitSeconds: 15
 });
 
