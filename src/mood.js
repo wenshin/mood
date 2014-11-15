@@ -8,7 +8,7 @@ var Log = require('./utils/log').Log;
 // Mood constructor
 function Mood(name) {
   var mo = this;
-  this.hookManager = new hook.Manager();
+  this.hookManager = hook.Manager;
   this.rootScope = new scope.Scope(name || '', function(name) {
     mo.hookManager.run(name);
   });
