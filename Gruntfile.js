@@ -74,7 +74,7 @@ module.exports = function(grunt) {
       libtest: {
         src: ['lib/**/*.js', 'test/**/*.js']
       },
-      mood: {
+      build: {
         src: ['src/**/*.js']
       }
     },
@@ -90,8 +90,8 @@ module.exports = function(grunt) {
         files: '<%= jshint.libtest.src %>',
         tasks: ['jshint:libtest', 'qunit']
       },
-      mood: {
-        files: '<%= jshint.mood.src %>',
+      build: {
+        files: '<%= jshint.build.src %>',
         tasks: ['concat:build']
       }
     }
