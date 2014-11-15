@@ -70,6 +70,9 @@ module.exports = function(grunt) {
       },
       libtest: {
         src: ['lib/**/*.js', 'test/**/*.js']
+      },
+      mood: {
+        src: ['src/**/*.js']
       }
     },
     qunit: {
@@ -83,6 +86,10 @@ module.exports = function(grunt) {
       libtest: {
         files: '<%= jshint.libtest.src %>',
         tasks: ['jshint:libtest', 'qunit']
+      },
+      mood: {
+        files: '<%= jshint.mood.src %>',
+        tasks: ['concat:build']
       }
     }
   });

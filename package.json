@@ -1,5 +1,11 @@
 {
   "name": "mood",
+  "version": "0.0.1",
+  "homepage": "www.hiyuanwen.com",
+  "licenses": "MIT",
+  "author": {
+    "name": "wenshin"
+  },
   "engines": {
     "node": ">= 0.10.0"
   },
