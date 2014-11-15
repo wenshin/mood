@@ -2,8 +2,8 @@
 
 var scope = require('./scope');
 var hook = require('./hook');
-var Type = require('utils/type').Type;
-var Log = require('utils/log').Log;
+var Type = require('./utils/type').Type;
+var Log = require('./utils/log').Log;
 
 // Mood constructor
 function Mood() {
@@ -54,7 +54,7 @@ Mood.prototype.initControllers = function(scope, contrs) {
     contrs = [contrs];
   }
   contrs.forEach(function(contr) {
-    contr.call(win, scope);
+    contr.call(this, scope);
   });
 };
 

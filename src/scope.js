@@ -1,8 +1,8 @@
 'use strict';
 
 var mood = require('./mood');
-var Type = require('utils/type').Type;
-var Log = require('utils/log').Log;
+var Type = require('./utils/type').Type;
+var Log = require('./utils/log').Log;
 
 var Scope = function(app, schema, chain) {
   /*

@@ -1,9 +1,8 @@
 'use strict';
 
-var utils = require('./utils');
-var Log = utils.Log;
-var Processor = require('utils/processor').Processor;
-var ChainName = require('utils/chainame').ChainName;
+var Log = require('./utils/log').Log;
+var Processor = require('./utils/processor').Processor;
+var ChainName = require('./utils/chainame').ChainName;
 
 // 支持a.b.c的属性名，直接使用a的Hooks
 var Hook = function() {
