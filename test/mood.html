@@ -3,12 +3,15 @@
 <head>
   <title></title>
   <meta charset="utf-8" />
+  <script src="/dist/bootstrap/mo.js"></script>
   <script data-main="app" src="/bower_components/requirejs/require.js"></script>
 </head>
 <body>
   <header>
-  <div mo-scope="test" mo-html="abd{{content}}bbb"></div>
-  <div id="123"></div>
+  <div mo-scope="myapp.myscope">
+    <div mo-html="I am <%=name%>">I am testing:)</div>
+  </div>
+  <div id="123" mo-scope="test"></div>
   </header>
 </body>
 </html>

@@ -9,11 +9,11 @@ require( ['mood'], function(mood) {
   'use strict';
 
   // debug is true will print the info in console
-  mood.Mood.config({ debug: true });
+  mood.Mood.config({ debug: false });
 
   var app = new mood.Mood('myapp');
 
-  app.initScope('myscope', {
+  app.createScope('myscope', {
       name: '',
       test: 0,
       isRight: true
@@ -26,10 +26,6 @@ require( ['mood'], function(mood) {
         scope.name = ', wenshin' + i;
         i++;
       }, 1000);
-    },
-
-    function(scope) {
-      document.getElementById('123').innerHTML = scope.test + scope.name;
     }
   );
 });

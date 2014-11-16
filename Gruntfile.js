@@ -61,7 +61,10 @@ module.exports = function(grunt) {
           banner: purejsPrefix,
           footer: purejsSuffix
         },
-        files: wrap('bootstrap')
+        files: {
+          'dist/bootstrap/mo.js': [
+            'src/bootstrap/tmpl.js', 'src/bootstrap/mo.js', 'src/bootstrap/mo*.js']
+        }
       }
     },
     uglify: {
