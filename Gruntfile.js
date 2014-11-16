@@ -2,22 +2,36 @@
 module.exports = function(grunt) {
   'use strict';
 
-  var srcPath = 'src/';
-  var distPath = 'dist/';
+  var SRC_PATH = 'src/';
+  var DIST_PATH = 'dist/';
+  var PREFIX = '.prefix';
+  var SUFFIX = '.suffix';
 
-  var modulePrefix = grunt.file.read(srcPath + 'module.prefix');
-  var moduleSuffix = grunt.file.read(srcPath + 'module.suffix');
+  var readWrapper = function(path, name, filesuffix) {
+    return grunt.file.read(SRC_PATH + name + filesuffix);
+  };
 
-  function mapSrc2DistPath(srcPath, distPath) {
+  var modulePrefix = readWrapper(SRC_PATH, 'module', PREFIX);
+  var moduleSuffix = readWrapper(SRC_PATH, 'module', SUFFIX);
+  var purejsPrefix = readWrapper(SRC_PATH, 'purejs', PREFIX);
+  var purejsSuffix = readWrapper(SRC_PATH, 'purejs', SUFFIX);
+
+  function mapSrc2DistPath(srcPath, distPath, ignore) {
     // Generate a grunt 'files' format src and dist mapping config from a directory
     // e.g.
     // { 'dist/test.js': 'src/test.js', 'dist/test1.js': 'src/test1.js' }
     var config = {};
     var filePaths = grunt.file.expand(srcPath + '**/*.js');
     filePaths.forEach(function(filePath) {
+      if ( ignore && filePath.indexOf(ignore) !== -1 ) { return; }
       config[filePath.replace(srcPath, distPath)] = filePath;
     });
     return config;
+  }
+
+  function wrap(name) {
+    var path = name + '/';
+    return mapSrc2DistPath(SRC_PATH + path, DIST_PATH + path);
   }
 
   // Project configuration.
@@ -35,12 +49,19 @@ module.exports = function(grunt) {
         banner: '<%= banner %>',
         stripBanners: true
       },
-      build: {
+      buildMood: {
         options: {
           banner: modulePrefix,
           footer: moduleSuffix
         },
-        files: mapSrc2DistPath(srcPath, distPath)
+        files: wrap('mood')
+      },
+      buildBootstrap: {
+        options: {
+          banner: purejsPrefix,
+          footer: purejsSuffix
+        },
+        files: wrap('bootstrap')
       }
     },
     uglify: {
@@ -48,7 +69,7 @@ module.exports = function(grunt) {
         banner: '<%= banner %>'
       },
       dist: {
-        src: '<%= concat.dist.dest %>',
+        src: 'dist/<%= pkg.name %>.js',
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
@@ -92,8 +113,11 @@ module.exports = function(grunt) {
       },
       build: {
         files: '<%= jshint.build.src %>',
-        tasks: ['concat:build']
+        tasks: ['clean:build', 'concat:buildMood', 'concat:buildBootstrap']
       }
+    },
+    clean: {
+      build: ['dist/**/*.js']
     }
   });
 
@@ -103,6 +127,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-qunit');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-clean');
 
   // Default task.
   grunt.registerTask('default', ['jshint', 'qunit', 'concat', 'uglify']);
