@@ -7,10 +7,8 @@ var Log = require('./utils/log').Log;
 
 // Mood constructor
 function Mood(name) {
-  var mo = this;
-  this.hookManager = hook.Manager;
   this.rootScope = new scope.Scope(name || '', function(name) {
-    mo.hookManager.run(name);
+    hook.Manager.run(name);
   });
 }
 
@@ -33,7 +31,7 @@ Mood.prototype.initScope = function(name, schema, controllers, hooks) {
 
   // Must before controller
   hooks = Type.toArray(hooks);
-  this.hookManager.add(scope, hooks);
+  hook.Manager.add(scope, hooks);
 
   controllers = Type.toArray(controllers);
   controllers.forEach(function(controller) {

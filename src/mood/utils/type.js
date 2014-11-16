@@ -12,5 +12,8 @@ exports.Type = {
   },
   toArray: function(objs) {
     if ( !this.isArray(objs) ) { return [objs]; }
+  },
+  capitalize: function(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 };
