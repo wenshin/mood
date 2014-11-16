@@ -4,12 +4,14 @@ var scope = require('./scope');
 var hook = require('./hook');
 var Type = require('./utils/type').Type;
 var Log = require('./utils/log').Log;
+var win = window || {};
 
 // Mood constructor
 function Mood(name) {
   this.rootScope = new scope.Scope(name || '', function(name) {
     hook.Manager.run(name);
   });
+  win.moApp = this;
 }
 
 Mood._config = {
@@ -25,7 +27,7 @@ Mood.config = function(option) {
   Log.debug = Mood._config.debug;
 };
 
-Mood.prototype.initScope = function(name, schema, controllers, hooks) {
+Mood.prototype.createScope = function(name, schema, controllers, hooks) {
   // <params schema>: is a Object or model structure
   var scope = this.addScope(name, schema);
 
