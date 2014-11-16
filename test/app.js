@@ -1,5 +1,3 @@
-/* global require, setInterval, document */
-
 require.config({
   baseUrl: '../dist/mood/',
   waitSeconds: 15
@@ -13,19 +11,14 @@ require( ['mood'], function(mood) {
 
   var app = new mood.Mood('myapp');
 
-  app.createScope('myscope', {
-      name: '',
-      test: 0,
-      isRight: true
-    },
+  var myScope = app.getScope('myscope');
 
-    function(scope) {
-      var i = 0;
-      setInterval(function() {
-        scope.test = i;
-        scope.name = ', wenshin' + i;
-        i++;
-      }, 1000);
-    }
-  );
+  myScope.defineControllers(function(scope) {
+    var i = 0;
+    setInterval(function() {
+      scope.test = i;
+      scope.name = ', wenshin' + i;
+      i++;
+    }, 1000);
+  });
 });
