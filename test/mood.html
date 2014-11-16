@@ -8,7 +8,9 @@
 <body mo-app="myapp">
   <header>
   <div mo-scope="myscope">
-    <div mo-text="I am <%=name%>">I am testing:)</div>
+    <input mo-class="<%=attr.class%>" value="I am testing:)" mo-value="<%=name%>">
+    <div mo-class="<%=attr.class%>" mo-html="<%=name%>">I am Testing :)</div>
+    <div mo-class="<%=attr.class%>" mo-text="<%=name%>">I am Testing :)</div>
   </div>
   <div id="123" mo-scope="test"></div>
   </header>
