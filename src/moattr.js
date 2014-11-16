@@ -10,12 +10,20 @@ var getRender = function(t) {
   return _render[t] || tmpl(t);
 };
 
+var lazyAssign = function(obj, name, assign) {
+  if( obj[name] !== assign ) { obj[name] = assign; }
+};
+
+var render = function(attr, scope, escape) {
+  return getRender(attr)(scope, escape);
+};
+
 // will not escape the html tags
 moAttrs.moHtml = {
   getHook: function(attr) {
     return function(scope) {
       // this is the element
-      this.innerHTML = getRender(attr)(scope);
+      lazyAssign(this, 'innerHTML', render(attr, scope, false));
     };
   }
 };
@@ -24,7 +32,7 @@ moAttrs.moHtml = {
 moAttrs.moText = {
   getHook: function(attr) {
     return function(scope) {
-      this.innerHTML = getRender(attr)(scope, false);
+      lazyAssign(this, 'innerHTML', render(attr, scope));
     };
   }
 };
@@ -33,7 +41,7 @@ moAttrs.moText = {
 moAttrs.moClass = {
   getHook: function(attr) {
     return function(scope) {
-      this.className = getRender(attr)(scope, false);
+      lazyAssign(this, 'className', render(attr, scope));
     };
   }
 };
@@ -44,7 +52,7 @@ normalAttrs.forEach(function(name) {
   var attrUtil = {
     getHook: function(attr) {
       return function(scope) {
-        this[name] = getRender(attr)(scope, false);
+        lazyAssign(this, name, render(attr, scope));
       };
     }
   };

@@ -17,7 +17,7 @@ var tmpl = function tmpl(str, data, escape){
     // Generate a reusable function that will serve as a template
     // generator (and which will be cached).
     new Function('obj', 'escape', // jshint ignore:line
-      "escape = escape || true;" +
+      "escape = escape === false ? escape : true;" +
       "var p = [], params = []," +
       "safePush = function(){" +
         "if(escape){" +
