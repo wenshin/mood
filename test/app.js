@@ -1,7 +1,7 @@
 /* global require, setInterval, document */
 
 require.config({
-  baseUrl: '../dist',
+  baseUrl: '../dist/mood/',
   waitSeconds: 15
 });
 
