@@ -4,7 +4,7 @@
 /* jshint ignore:start */
 var cache = {};
 
-window.tmpl = function tmpl(str, data){
+var tmpl = function tmpl(str, data){
   // Figure out if we're getting a template, or if we need to
   // load the template - and be sure to cache the result.
   var fn = !/\W/.test(str) ?
@@ -33,3 +33,5 @@ window.tmpl = function tmpl(str, data){
   // Provide some basic currying to the user
   return data ? fn( data ) : fn;
 };
+
+exports.tmpl = tmpl;

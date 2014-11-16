@@ -2,14 +2,19 @@
 
 var scope = require('./scope');
 var hook = require('./hook');
+var bootstrap = require('./bootstrap');
 var Type = require('./utils/type').Type;
 var Log = require('./utils/log').Log;
 var win = window || {};
 
 // Mood constructor
 function Mood(name) {
+  var mood = this;
   this.rootScope = new scope.Scope(name || '', function(name) {
     hook.Manager.run(name);
+  });
+  bootstrap.initScope(function(scopeName, schema, hooks){
+    mood.createScope(scopeName, schema, null, hooks);
   });
   win.moApp = this;
 }
@@ -34,11 +39,7 @@ Mood.prototype.createScope = function(name, schema, controllers, hooks) {
   // Must before controller
   hooks = Type.toArray(hooks);
   hook.Manager.add(scope, hooks);
-
-  controllers = Type.toArray(controllers);
-  controllers.forEach(function(controller) {
-    controller.call(null, scope);
-  });
+  return scope;
 };
 
 Mood.prototype.getScope = function(name) {

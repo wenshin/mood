@@ -3,40 +3,6 @@
 var Log = require('./utils/log').Log;
 var Processor = require('./utils/processor').Processor;
 var ChainName = require('./utils/chainame').ChainName;
-var Util = require('./utils/util').Util;
-
-var ATTR_PREFIX = 'mo';
-var SCOPE = 'Scope';
-var attrMetas = ['Html'];
-
-var moAttr = function(meta) {
-  return [ATTR_PREFIX, '-', meta.toLowerCase()].join('');
-};
-
-var moModule = function(meta) {
-  return ATTR_PREFIX + meta;
-};
-
-var moAttrSelector = function(meta, value) {
-  value = value ? '="' + value + '"' : '';
-  return ['[', moAttr(meta), value, ']'].join('');
-};
-
-var renderHook = function(scope) {
-  // 获取有 mo-scope 属性的 DOM elements;
-  var scopeElems = document.querySelectorAll(moAttrSelector(SCOPE, scope.getName()));
-
-  Util.each(scopeElems, function(scopeElem) {
-    Util.each(attrMetas, function(meta) {
-      var elems = scopeElem.querySelectorAll(moAttrSelector(meta));
-      Util.each(elems, function(elem) {
-        var attr = elem.getAttribute(moAttr(meta));
-        window.moAttr[moModule(meta)].call(elem, attr, scope);
-      });
-    });
-  });
-};
-
 
 // 支持a.b.c的属性名，直接使用a的Hooks
 var Manager = {
@@ -50,7 +16,6 @@ Manager.add = function(scope, hooks) {
   var hookName = scope.getName();
   var savedHooks = Manager._hooks[hookName] || [];
   var _hooks = [];
-  hooks.unshift(renderHook);
   hooks.forEach(function(hook) {
     _hooks.push(new Processor(hook));
   });

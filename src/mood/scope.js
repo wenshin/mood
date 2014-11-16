@@ -60,4 +60,12 @@ Scope.prototype.chainName = function(propName) {
   return this._name + '.' + propName;
 };
 
+Scope.prototype.defineControllers = function(controllers) {
+  var scope = this;
+  controllers = Type.toArray(controllers);
+  controllers.forEach(function(controller) {
+    controller.call(null, scope);
+  });
+};
+
 exports.Scope = Scope;
