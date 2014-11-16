@@ -13,8 +13,6 @@ module.exports = function(grunt) {
 
   var modulePrefix = readWrapper(SRC_PATH, 'module', PREFIX);
   var moduleSuffix = readWrapper(SRC_PATH, 'module', SUFFIX);
-  var purejsPrefix = readWrapper(SRC_PATH, 'purejs', PREFIX);
-  var purejsSuffix = readWrapper(SRC_PATH, 'purejs', SUFFIX);
 
   function mapSrc2DistPath(srcPath, distPath, ignore) {
     // Generate a grunt 'files' format src and dist mapping config from a directory
@@ -30,7 +28,7 @@ module.exports = function(grunt) {
   }
 
   function wrap(name) {
-    var path = name + '/';
+    var path = name ? name + '/' : '';
     return mapSrc2DistPath(SRC_PATH + path, DIST_PATH + path);
   }
 
@@ -54,17 +52,7 @@ module.exports = function(grunt) {
           banner: modulePrefix,
           footer: moduleSuffix
         },
-        files: wrap('mood')
-      },
-      buildBootstrap: {
-        options: {
-          banner: purejsPrefix,
-          footer: purejsSuffix
-        },
-        files: {
-          'dist/bootstrap/mo.js': [
-            'src/bootstrap/tmpl.js', 'src/bootstrap/mo.js', 'src/bootstrap/mo*.js']
-        }
+        files: wrap()  // src/ to dist/
       }
     },
     uglify: {
@@ -116,7 +104,7 @@ module.exports = function(grunt) {
       },
       build: {
         files: '<%= jshint.build.src %>',
-        tasks: ['clean:build', 'concat:buildMood', 'concat:buildBootstrap']
+        tasks: ['clean:build', 'concat:buildMood']
       }
     },
     clean: {

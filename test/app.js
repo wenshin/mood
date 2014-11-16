@@ -1,5 +1,5 @@
 require.config({
-  baseUrl: '../dist/mood/',
+  baseUrl: '../dist',
   waitSeconds: 15
 });
 
