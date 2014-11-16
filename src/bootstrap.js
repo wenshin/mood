@@ -51,7 +51,8 @@ var getHooksOfScope = function(scopeElem) {
 };
 
 var getSchemaOfScope = function() {
-  return {name: 'wenshin', test: 0};
+  // TODO: generate the schema of elem;
+  return {name: 'wenshin', test: 0, attr: {class: 'test-class'}};
 };
 
 var initScope = function(createScope) {

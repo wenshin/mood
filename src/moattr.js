@@ -1,5 +1,6 @@
 'use strict';
 
+var Type = require('./utils/type').Type;
 var tmpl = require('./utils/tmpl').tmpl;
 
 var _render = {};
@@ -27,5 +28,19 @@ moAttrs.moText = {
     };
   }
 };
+
+
+// Create normal attributes like 'class', 'id' ...
+var normalAttrs = ['id', 'class'];
+normalAttrs.forEach(function(attr) {
+  var attrUtil = {
+    getHook: function(attr) {
+      return function(scope) {
+        this.className = getRender(attr)(scope, false);
+      };
+    }
+  };
+  moAttrs['mo' + Type.capitalize(attr)] = attrUtil;  // Change to 'moId', 'moClass'...
+});
 
 exports.moAttrs = moAttrs;
