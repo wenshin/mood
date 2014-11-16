@@ -29,18 +29,26 @@ moAttrs.moText = {
   }
 };
 
+// Will escape the html tags
+moAttrs.moClass = {
+  getHook: function(attr) {
+    return function(scope) {
+      this.className = getRender(attr)(scope, false);
+    };
+  }
+};
 
 // Create normal attributes like 'class', 'id' ...
-var normalAttrs = ['id', 'class'];
-normalAttrs.forEach(function(attr) {
+var normalAttrs = ['id', 'type', 'value'];
+normalAttrs.forEach(function(name) {
   var attrUtil = {
     getHook: function(attr) {
       return function(scope) {
-        this.className = getRender(attr)(scope, false);
+        this[name] = getRender(attr)(scope, false);
       };
     }
   };
-  moAttrs['mo' + Type.capitalize(attr)] = attrUtil;  // Change to 'moId', 'moClass'...
+  moAttrs['mo' + Type.capitalize(name)] = attrUtil;  // Change to 'moId', 'moClass'...
 });
 
 exports.moAttrs = moAttrs;
