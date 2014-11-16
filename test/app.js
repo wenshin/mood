@@ -17,7 +17,8 @@ require( ['mood'], function(mood) {
     var i = 0;
     setInterval(function() {
       scope.test = i;
-      scope.name = ', wenshin' + i;
+      scope.name = ', <h1>123</h1><img src="test" onerror="document.write(123)">' + i;
+      // scope.name = ', wenshin' + i;
       i++;
     }, 1000);
   });
