@@ -1,0 +1,28 @@
+{
+  "undef": true,
+  "unused": true,
+  "bitwise": true,
+  "quotmark": "single",
+  "camelcase": true,
+  "immed": true,
+  "nonew": true,
+  "maxlen": 200,
+  "noempty": true,
+  "boss": true,
+  "eqeqeq": true,
+  "newcap": true,
+  "noarg": true,
+  "loopfunc": true,
+  "globalstrict": true,
+  "eqnull": true,
+  "expr": true,
+  "sub": true,
+  "laxbreak": true,
+  "indent": 2,
+  "predef": [
+    "define", "require", "exports", "module",
+    "window", "document", "setTimeout", "clearTimeout",
+    "clearInterval", "setTimeout", "setInterval",
+    "console"
+  ]
+}

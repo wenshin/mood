@@ -3,16 +3,14 @@
 <head>
   <title></title>
   <meta charset="utf-8" />
+  <script data-main="app" src="/bower_components/requirejs/require.js"></script>
 </head>
-<body>
+<body mo-app="myapp">
   <header>
-  <div id="123"></div>
+  <div mo-scope="myscope">
+    <div mo-html="I am <%=name%>">I am testing:)</div>
+  </div>
+  <div id="123" mo-scope="test"></div>
   </header>
-  <footer>
-    
-  </footer>
-  <script type="text/javascript" charset="utf-8" src="../src/mood.js"></script>
-  <script type="text/javascript" charset="utf-8" src="app.js"></script>
 </body>
 </html>
-
