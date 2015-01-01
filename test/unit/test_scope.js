@@ -26,6 +26,7 @@ describe('Scope', function(){
       var updatorCalled = false;
       scope.addProp('a', 1, function() {
         assert.equal(this.a, 2);
+        assert.notTypeOf(this, 'Scope');
         updatorCalled = true;
       });
       scope.a = 2;
