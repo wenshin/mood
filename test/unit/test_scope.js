@@ -24,13 +24,19 @@ describe('Scope', function(){
     it('should run updator when assign', function() {
       var scope = new Scope('scope1');
       var updatorCalled = false;
+      var selfUpdatorCalled = false;
       scope.addProp('a', 1, function() {
         assert.equal(this.a, 2);
         assert.notTypeOf(this, 'Scope');
         updatorCalled = true;
       });
+      scope.addUpdators(function() {
+        assert.equal(this.a, 2);
+        selfUpdatorCalled = true;
+      });
       scope.a = 2;
       assert.equal(updatorCalled, true);
+      assert.equal(selfUpdatorCalled, true);
     });
 
     it('should run all updators when assign', function() {
