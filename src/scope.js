@@ -5,6 +5,7 @@ var Log = require('./utils/log').Log;
 
 var Scope = function(name, schema) {
   this.name = name;
+  this.selfUpdatorName = '__self';
   this.updator = {};
   // 用于缓存当前Scope对象属性的值，以让getter可以正常获得
   this.__props = {};
@@ -50,8 +51,16 @@ Scope.prototype.addProp = function (name, defaultValue, updators) {
 };
 
 Scope.prototype.addUpdators = function(name, updators) {
+  // 当name 参数不是字符串时，也即 name 参数不传递时，保存 updators 到
+  // this.selfUpdatorName 的属性下。该属性下的函数列表会在任务和属性修
+  // 改时触发。
+  if ( !Type.isString(name) ) {
+    updators = name;
+    name = this.selfUpdatorName;
+  }
   updators = updators || [];
-  if ( !Type.isArray(updators) ) { updators = [updators]; }
+  if ( Type.isFunction(updators) ) { updators = [updators]; }
+
   if ( this.updator[name] ) {
     this.updator[name].concat(updators);
   } else {
@@ -59,10 +68,20 @@ Scope.prototype.addUpdators = function(name, updators) {
   }
 };
 
-Scope.prototype.trigger = function(name) {
-  var updators = this.updator[name];
-  for ( var h in updators ) {
-    updators[h].call(this.copy());
+Scope.prototype.trigger = function(names) {
+  var updators = [], i;
+  var _concat = function(array) {
+    updators = updators.concat(array || []);
+  };
+  if ( Type.isString(names) ) { names = [names]; } // names 是单个属性名称
+
+  for ( i = 0; i < names.length; i++ ) {
+    _concat(this.updator[names[i]]);
+  }
+  _concat(this.updator[this.selfUpdatorName]);
+
+  for ( i = 0; i < updators.length; i++ ) {
+    updators[i].call(this.copy());
   }
 };
 
