@@ -2,46 +2,62 @@
 // John Resig - http://ejohn.org/ - MIT Licensed
 // YuanWen - MIT Licensed
 
-'use strict';
+/* jshint strict: false */
+
+(function() {
+  String.prototype.xssSafe = function() {
+    var str = String(this);
+    str = str.replace(/&/g, '&amp;')
+             .replace(/"/g, '&quot;')
+             .replace(/'/g, '&#039;')
+             .replace(/:/g, '&#058;')
+             .replace(/\\/g, '&#092;')
+             .replace(/\//g, '&#047;')
+             .replace(/>/g, '&gt;')
+             .replace(/</g, '&lt;');
+    return str;
+  };
+})();
 
 var cache = {};
+var updateParser = /\{>\s*([^{}]+?)\s*\}/g;
+var controlParser = /^\$>\s*(.+)\s*$/g;
 
-var tmpl = function tmpl(str, data, escape){
-  // Figure out if we're getting a template, or if we need to
-  // load the template - and be sure to cache the result.
-  /* jshint quotmark:double */
-  var fn = !/\W/.test(str) ?
-    cache[str] = cache[str] ||
-      tmpl(document.getElementById(str).innerHTML) :
+var array2Str = function(array) {
+  return '[\'' + array.join('\',\'') + '\']';
+};
 
-    // Generate a reusable function that will serve as a template
-    // generator (and which will be cached).
-    new Function('obj', 'escape', // jshint ignore:line
-      "escape = escape === false ? escape : true;" +
-      "var p = [], params = []," +
-      "safePush = function(){" +
-        "if(escape){" +
-          "for(var i=0;i<arguments.length;i++){" +
-            "if(arguments[i].xssSafe){" +
-              "p.push(arguments[i].xssSafe()); }}}" +
-        "else { p.push.apply(p,arguments);} };" +
 
-      // Introduce the data as local variables using with(){}
-      "with(obj){safePush('" +
+var tmpl = function tmpl(str, data, escape) {
+  var render = cache[str];
 
-      // Convert the template into pure JavaScript
-      str
-        .replace(/[\r\t\n]/g, " ")
-        .split("<%").join("\t")
-        .replace(/((^|%>)[^\t]*)'/g, "$1\r")
-        .replace(/\t=(.*?)%>/g, "',$1,'")
-        .split("\t").join("');")
-        .split("%>").join("p.push('")
-        .split("\r").join("\\'") +
-      "');}return p.join('');");
+  if ( !render ) {
+    var matchs = str.match(updateParser), match, codes = [],
+        code;
 
-  // Provide some basic currying to the user
-  return data ? fn( data, escape ) : fn;
+    for ( var i = 0; i < matchs.length; i++ ) {
+      match = updateParser.exec(matchs[i]);
+      code = match && match[1];
+      code && codes.push(code);
+      updateParser.exec(matchs[i]); // 跳过最后一次运行
+    }
+
+    var fnBody =
+      'escape = escape === false ? escape : true;' +
+      'var value, code, str=\'' + str + '\';' +
+      'var matchs=' + array2Str(matchs) + ', codes;' +
+      'with(data){ codes=[' + codes + '];}' +
+      'for ( var i = 0; i < matchs.length; i++ ) {' +
+        'code = escape && codes[i].xssSafe ? codes[i].xssSafe() : codes[i];' +
+        'str = str.replace(matchs[i], code);' +
+      '}' +
+      'return str;';
+
+    render = new Function('data', 'escape', fnBody);
+    cache[str] = render;
+  }
+
+  return data ? render(data, escape) : render;
 };
 
 exports.tmpl = tmpl;
