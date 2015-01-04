@@ -64,7 +64,7 @@ tmpl.update = function update(str, data, escape) {
   return data ? render(data, escape) : render;
 };
 
-tmpl.control = function control(str, data, escape) {
+tmpl.control = function control(str, data) {
   var _control = cache[str];
   if ( !_control ) {
     var match = controlParser.exec(str), codes;
