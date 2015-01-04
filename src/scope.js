@@ -6,10 +6,11 @@ var Log = require('./utils/log').Log;
 var Scope = function(name, schema) {
   this.name = name;
   this.selfUpdatorName = '__self';
-  this.updator = {};
+  this.Controller = {};
   // 用于缓存当前Scope对象属性的值，以让getter可以正常获得
-  this.__props = {};
-  this.__lastProps = {};
+  this._updator = {};
+  this._props = {};
+  this._lastProps = {};
   if ( schema && Type.isObject(schema) ) {
     for ( var p in schema ) {
       if ( schema.hasOwnProperty(p) ) {
@@ -61,10 +62,10 @@ Scope.prototype.addUpdators = function(name, updators) {
   updators = updators || [];
   if ( Type.isFunction(updators) ) { updators = [updators]; }
 
-  if ( this.updator[name] ) {
-    this.updator[name].concat(updators);
+  if ( this._updator[name] ) {
+    this._updator[name].concat(updators);
   } else {
-    this.updator[name] = updators;
+    this._updator[name] = updators;
   }
 };
 
@@ -76,9 +77,9 @@ Scope.prototype.trigger = function(names) {
   if ( Type.isString(names) ) { names = [names]; } // names 是单个属性名称
 
   for ( i = 0; i < names.length; i++ ) {
-    _concat(this.updator[names[i]]);
+    _concat(this._updator[names[i]]);
   }
-  _concat(this.updator[this.selfUpdatorName]);
+  _concat(this._updator[this.selfUpdatorName]);
 
   for ( i = 0; i < updators.length; i++ ) {
     updators[i].call(this.copy());
@@ -86,16 +87,16 @@ Scope.prototype.trigger = function(names) {
 };
 
 Scope.prototype._setProp = function(name, value) {
-  this.__lastProps[name] = this.__props[name];
-  this.__props[name] = value;
+  this._lastProps[name] = this._props[name];
+  this._props[name] = value;
 };
 
 Scope.prototype._getProp = function(name) {
-  return this.__props[name];
+  return this._props[name];
 };
 
 Scope.prototype.propNotChanged = function(name, value) {
-  return this.__props[name] === value;
+  return this._props[name] === value;
 };
 
 Scope.prototype.chainName = function(propName) {
@@ -105,7 +106,7 @@ Scope.prototype.chainName = function(propName) {
 Scope.prototype.copy = function() {
   // copy a scope, but if changed will not trigger update functions
   var copy = {};
-  var props = this.__props;
+  var props = this._props;
   for ( var p in props ) {
     if ( props.hasOwnProperty(p) ) {
       if ( props[p] instanceof Scope ) {
