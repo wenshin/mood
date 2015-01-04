@@ -27,29 +27,33 @@ var array2Str = function(array) {
   return '[\'' + array.join('\',\'') + '\']';
 };
 
+var tmpl = {};
 
-var tmpl = function tmpl(str, data, escape) {
+tmpl.update = function update(str, data, escape) {
   var render = cache[str];
 
   if ( !render ) {
     var matchs = str.match(updateParser), match, codes = [],
-        code;
+        code, fnBody;
 
     for ( var i = 0; i < matchs.length; i++ ) {
       match = updateParser.exec(matchs[i]);
       code = match && match[1];
+      if ( code.indexOf('++') !== -1 || code.indexOf('--') !== -1 ) {
+        throw new TypeError('Do not use ++ or -- in {> }');
+      }
       code && codes.push(code);
       updateParser.exec(matchs[i]); // 跳过最后一次运行
     }
 
-    var fnBody =
+    fnBody =
       'escape = escape === false ? escape : true;' +
       'var value, code, str=\'' + str + '\';' +
-      'var matchs=' + array2Str(matchs) + ', codes;' +
-      'with(data){ codes=[' + codes + '];}' +
+      'var matchs=' + array2Str(matchs) + ', values;' +
+      'with(data){ values=[' + codes + '];}' +
       'for ( var i = 0; i < matchs.length; i++ ) {' +
-        'code = escape && codes[i].xssSafe ? codes[i].xssSafe() : codes[i];' +
-        'str = str.replace(matchs[i], code);' +
+        'value = escape && values[i].xssSafe ? values[i].xssSafe() : values[i];' +
+        'str = str.replace(matchs[i], value);' +
       '}' +
       'return str;';
 
@@ -58,6 +62,17 @@ var tmpl = function tmpl(str, data, escape) {
   }
 
   return data ? render(data, escape) : render;
+};
+
+tmpl.control = function control(str, data, escape) {
+  var _control = cache[str];
+  if ( !_control ) {
+    var match = controlParser.exec(str), codes;
+    codes = match && match[1];
+    _control = new Function('data', 'with(data){ ' + codes + '}');
+    cache[str] = _control;
+  }
+  return data ? _control(data) : _control;
 };
 
 exports.tmpl = tmpl;
