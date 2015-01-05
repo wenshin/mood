@@ -19,18 +19,42 @@
   };
 })();
 
+var tmpl = {};
 var cache = {};
 var updateParser = /\{>\s*([^{}]+?)\s*\}/g;
 var controlParser = /^\$>\s*(.+)\s*$/g;
+var variableChainParser = /^[$_a-zA-Z][$_\w.]*$/;
+
+
+var code2Names = function(code) {
+  return code.split(/[^$_\w.]+/g); //可能出现['abc', '']
+};
+
 
 var array2Str = function(array) {
   return '[\'' + array.join('\',\'') + '\']';
 };
 
-var tmpl = {};
 
-tmpl.update = function update(str, data, escape) {
-  var render = cache[str];
+var addPrefix = function(namespace, str) {
+  return namespace + '.' + str;
+};
+
+
+var filterNames = function(namespace, names) {
+  var _names = [];
+  for (var i = 0; i < names.length; i++ ) {
+    if ( names[i].match(variableChainParser) ) {
+      _names.push(addPrefix(namespace, names[i]));
+    }
+  }
+  return _names;
+};
+
+
+tmpl.update = function update(namespace, str, data, escape) {
+  var cacheName = addPrefix(namespace, str);
+  var render = cache[cacheName], names = [];
 
   if ( !render ) {
     var matchs = str.match(updateParser), match, codes = [],
@@ -43,6 +67,7 @@ tmpl.update = function update(str, data, escape) {
         throw new TypeError('Do not use ++ or -- in {> }');
       }
       code && codes.push(code);
+      code ? names = names.concat(code2Names(code)) : false;
       updateParser.exec(matchs[i]); // 跳过最后一次运行
     }
 
@@ -57,22 +82,25 @@ tmpl.update = function update(str, data, escape) {
       '}' +
       'return str;';
 
-    render = new Function('data', 'escape', fnBody);
-    cache[str] = render;
+    render = {};
+    render.handle = new Function('data', 'escape', fnBody);
+    render.names = filterNames(namespace, names);
+    cache[cacheName] = render;
   }
 
-  return data ? render(data, escape) : render;
+  return data ? render.handle(data, escape) : render;
 };
 
-tmpl.control = function control(str, data) {
-  var _control = cache[str];
+tmpl.control = function control(namespace, str, data) {
+  var cacheName = addPrefix(namespace, str);
+  var _control = cache[cacheName];
   if ( !_control ) {
     var match = controlParser.exec(str), codes;
     codes = match && match[1];
     _control = new Function('data', 'with(data){ ' + codes + '}');
-    cache[str] = _control;
+    cache[cacheName] = _control;
   }
-  return data ? _control(data) : _control;
+  return data ? _control.handle(data) : _control;
 };
 
 exports.tmpl = tmpl;
