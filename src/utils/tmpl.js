@@ -54,9 +54,9 @@ var filterNames = function(namespace, names) {
 
 tmpl.render = function render(namespace, str, data, escape) {
   var cacheName = addPrefix(namespace, str);
-  var render = cache[cacheName], names = [];
+  var renderObj = cache[cacheName], names = [];
 
-  if ( !render ) {
+  if ( !renderObj ) {
     var matchs = str.match(renderParser), match, codes = [],
         code, fnBody;
 
@@ -82,25 +82,29 @@ tmpl.render = function render(namespace, str, data, escape) {
       '}' +
       'return str;';
 
-    render = {};
-    render.handle = new Function('data', 'escape', fnBody);
-    render.names = filterNames(namespace, names);
-    cache[cacheName] = render;
+    renderObj = {};
+    renderObj.handle = new Function('data', 'escape', fnBody);
+    renderObj.names = filterNames(namespace, names);
+    cache[cacheName] = renderObj;
   }
 
-  return data ? render.handle(data, escape) : render;
+  return data ? renderObj.handle(data, escape) : renderObj;
 };
 
 tmpl.control = function control(namespace, str, data) {
   var cacheName = addPrefix(namespace, str);
-  var _control = cache[cacheName];
-  if ( !_control ) {
+  var controlObj = cache[cacheName], names;
+
+  if ( !controlObj ) {
     var match = controlParser.exec(str), codes;
     codes = match && match[1];
-    _control = new Function('data', 'with(data){ ' + codes + '}');
-    cache[cacheName] = _control;
+    names = code2Names(codes);
+    controlObj = {};
+    controlObj.handle = new Function('data', 'with(data){ ' + codes + '}');
+    controlObj.names = filterNames(namespace, names);
+    cache[cacheName] = controlObj;
   }
-  return data ? _control.handle(data) : _control;
+  return data ? controlObj.handle(data) : controlObj;
 };
 
 exports.tmpl = tmpl;

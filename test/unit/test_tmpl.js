@@ -30,11 +30,12 @@ describe('tmpl', function(){
   describe('#control', function(){
 
     it('should generate a function and modify data property', function(){
-      var control = tmpl.control('testScope', '$> c++');
-      var data = {c: 1};
-      control(data);
-      assert.typeOf(control, 'Function');
+      var controlObj = tmpl.control('testScope', '$> b + c++');
+      var data = {c: 1, b: 3};
+      controlObj.handle(data);
+      assert.typeOf(controlObj.handle, 'Function');
       assert.equal(data.c, 2);
+      assert.equal(controlObj.names, ['testScope.b', 'testScope.c']);
     });
 
   });
