@@ -52,10 +52,7 @@ module.exports = function(grunt) {
           banner: modulePrefix,
           footer: moduleSuffix
         },
-        files: wrap(null, 'src/lib')  // src/ to dist/
-      },
-      copyLib: {
-        files: wrap('lib')
+        files: wrap()  // src/ to dist/
       }
     },
     uglify: {
@@ -107,7 +104,7 @@ module.exports = function(grunt) {
       },
       build: {
         files: '<%= jshint.build.src %>',
-        tasks: ['clean:build', 'concat:buildMood',  'concat:copyLib']
+        tasks: ['clean:build', 'concat:buildMood']
       }
     },
     clean: {
