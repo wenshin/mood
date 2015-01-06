@@ -1,36 +1,39 @@
 'use strict';
 
-var Type = require('./utils/type').Type;
 var Log = require('./utils/log').Log;
+var $ = require('./lib/jquery.core').jQuery;
 
-var Scope = function(name, schema) {
+
+var Scope = function(name, props) {
   this.name = name;
-  this.selfUpdatorName = '__self';
+  this.selfRenderName = '__self';
   this.Controller = {};
+  this._renders = {};
   // 用于缓存当前Scope对象属性的值，以让getter可以正常获得
-  this._updator = {};
   this._props = {};
   this._lastProps = {};
-  if ( schema && Type.isObject(schema) ) {
-    for ( var p in schema ) {
-      if ( schema.hasOwnProperty(p) ) {
-        this.addProp(p, schema[p]);
-      }
-    }
+  if ( props && $.isPlainObject(props) ) {
+    $.each(props, function(prop, value) {
+      this.addProp(prop, value);
+    });
   }
 };
 
-Scope.prototype.addProp = function (name, defaultValue, updators) {
+
+Scope.renders = {};
+Scope.controllers = {};
+
+Scope.prototype.addProp = function (name, defaultValue, renders) {
   // 如果 defaultValue 不使用建议设置为 null。
   var upper = this;
   var chainedName = this.chainName(name);
-  this.addUpdators(name, updators);
+  this.addRenders(name, renders);
 
   Object.defineProperty(this, name, {
     set: function(value) {
       if ( upper.propNotChanged(name, value) ) { return; }
 
-      if ( Type.isObject(value) ) {
+      if ( $.isPlainObject(value) ) {
         // 创建子Scope
         upper._setProp(name, new Scope(chainedName, value));
       } else {
@@ -51,38 +54,38 @@ Scope.prototype.addProp = function (name, defaultValue, updators) {
   this._setProp(name, defaultValue);
 };
 
-Scope.prototype.addUpdators = function(name, updators) {
-  // 当name 参数不是字符串时，也即 name 参数不传递时，保存 updators 到
-  // this.selfUpdatorName 的属性下。该属性下的函数列表会在任务和属性修
+Scope.prototype.addRenders = function(name, renders) {
+  // 当name 参数不是字符串时，也即 name 参数不传递时，保存 renders 到
+  // this.selfRenderName 的属性下。该属性下的函数列表会在任务和属性修
   // 改时触发。
-  if ( !Type.isString(name) ) {
-    updators = name;
-    name = this.selfUpdatorName;
+  if ( $.type(name) !== 'string' ) {
+    renders = name;
+    name = this.selfRenderName;
   }
-  updators = updators || [];
-  if ( Type.isFunction(updators) ) { updators = [updators]; }
+  renders = renders || [];
+  if ( $.isFunction(renders) ) { renders = [renders]; }
 
-  if ( this._updator[name] ) {
-    this._updator[name].concat(updators);
+  if ( this._renders[name] ) {
+    this._renders[name].concat(renders);
   } else {
-    this._updator[name] = updators;
+    this._renders[name] = renders;
   }
 };
 
 Scope.prototype.trigger = function(names) {
-  var updators = [], i;
+  var renders = [], i;
   var _concat = function(array) {
-    updators = updators.concat(array || []);
+    renders = renders.concat(array || []);
   };
-  if ( Type.isString(names) ) { names = [names]; } // names 是单个属性名称
+  if ( $.type(names) !== 'string' ) { names = [names]; } // names 是单个属性名称
 
   for ( i = 0; i < names.length; i++ ) {
-    _concat(this._updator[names[i]]);
+    _concat(this._renders[names[i]]);
   }
-  _concat(this._updator[this.selfUpdatorName]);
+  _concat(this._renders[this.selfRenderName]);
 
-  for ( i = 0; i < updators.length; i++ ) {
-    updators[i].call(this.copy());
+  for ( i = 0; i < renders.length; i++ ) {
+    renders[i].call(this.copy());
   }
 };
 

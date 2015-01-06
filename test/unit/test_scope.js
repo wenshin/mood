@@ -21,37 +21,37 @@ describe('Scope', function(){
       assert.equal(scope.a, null);
     });
 
-    it('should run updator when assign', function() {
+    it('should run render when assign', function() {
       var scope = new Scope('scope1');
-      var updatorCalled = false;
-      var selfUpdatorCalled = false;
+      var renderCalled = false;
+      var selfRenderCalled = false;
       scope.addProp('a', 1, function() {
         assert.equal(this.a, 2);
         assert.notTypeOf(this, 'Scope');
-        updatorCalled = true;
+        renderCalled = true;
       });
-      scope.addUpdators(function() {
+      scope.addRenders(function() {
         assert.equal(this.a, 2);
-        selfUpdatorCalled = true;
+        selfRenderCalled = true;
       });
       scope.a = 2;
-      assert.equal(updatorCalled, true);
-      assert.equal(selfUpdatorCalled, true);
+      assert.equal(renderCalled, true);
+      assert.equal(selfRenderCalled, true);
     });
 
-    it('should run all updators when assign', function() {
+    it('should run all renders when assign', function() {
       var scope = new Scope('scope1');
-      var updator1Called =false, updator2Called = false;
+      var render1Called =false, render2Called = false;
       scope.addProp('a', 1, [function() {
         assert.equal(this.a, 2);
-        updator1Called = true;
+        render1Called = true;
       }, function() {
         assert.equal(this.a, 2);
-        updator2Called = true;
+        render2Called = true;
       }]);
       scope.a = 2;
-      assert.equal(updator1Called, true);
-      assert.equal(updator2Called, true);
+      assert.equal(render1Called, true);
+      assert.equal(render2Called, true);
     });
 
   });
