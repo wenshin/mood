@@ -41,22 +41,23 @@ var addPrefix = function(namespace, str) {
 };
 
 
-var filterNames = function(namespace, names) {
-  var _names = [];
+var getRenders = function(namespace, names, handle) {
+  var renders = [];
   for (var i = 0; i < names.length; i++ ) {
     if ( names[i].match(variableChainParser) ) {
-      _names.push(addPrefix(namespace, names[i]));
+      renders.push({
+        name: addPrefix(namespace, names[i]), handle: handle});
     }
   }
-  return _names;
+  return renders;
 };
 
 
 tmpl.update = function update(namespace, str, data, escape) {
   var cacheName = addPrefix(namespace, str);
-  var render = cache[cacheName], names = [];
+  var renders = cache[cacheName], names = [], handle;
 
-  if ( !render ) {
+  if ( !renders ) {
     var matchs = str.match(updateParser), match, codes = [],
         code, fnBody;
 
@@ -82,13 +83,12 @@ tmpl.update = function update(namespace, str, data, escape) {
       '}' +
       'return str;';
 
-    render = {};
-    render.handle = new Function('data', 'escape', fnBody);
-    render.names = filterNames(namespace, names);
-    cache[cacheName] = render;
+    handle = new Function('data', 'escape', fnBody);
+    renders = getRenders(namespace, names, handle);
+    cache[cacheName] = renders;
   }
 
-  return data ? render.handle(data, escape) : render;
+  return data ? handle(data, escape) : renders;
 };
 
 tmpl.control = function control(namespace, str, data) {
