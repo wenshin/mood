@@ -21,7 +21,7 @@
 
 var tmpl = {};
 var cache = {};
-var updateParser = /\{>\s*([^{}]+?)\s*\}/g;
+var renderParser = /\{>\s*([^{}]+?)\s*\}/g;
 var controlParser = /^\$>\s*(.+)\s*$/g;
 var variableChainParser = /^[$_a-zA-Z][$_\w.]*$/;
 
@@ -52,23 +52,23 @@ var filterNames = function(namespace, names) {
 };
 
 
-tmpl.update = function update(namespace, str, data, escape) {
+tmpl.render = function render(namespace, str, data, escape) {
   var cacheName = addPrefix(namespace, str);
   var render = cache[cacheName], names = [];
 
   if ( !render ) {
-    var matchs = str.match(updateParser), match, codes = [],
+    var matchs = str.match(renderParser), match, codes = [],
         code, fnBody;
 
     for ( var i = 0; i < matchs.length; i++ ) {
-      match = updateParser.exec(matchs[i]);
+      match = renderParser.exec(matchs[i]);
       code = match && match[1];
       if ( code.indexOf('++') !== -1 || code.indexOf('--') !== -1 ) {
         throw new TypeError('Do not use ++ or -- in {> }');
       }
       code && codes.push(code);
       code ? names = names.concat(code2Names(code)) : false;
-      updateParser.exec(matchs[i]); // 跳过最后一次运行
+      renderParser.exec(matchs[i]); // 跳过最后一次运行
     }
 
     fnBody =

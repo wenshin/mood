@@ -7,10 +7,10 @@ var tmpl = require('../../dist/utils/tmpl').tmpl;
 
 describe('tmpl', function(){
 
-  describe('#update', function(){
+  describe('#render', function(){
 
     it('should generate a function and render right', function(){
-      var render = tmpl.update('testScope',
+      var render = tmpl.render('testScope',
                                'a + b = {> me.name + me.age } and c = {> c * 10 }');
       var data = {me: {name: 'wenshin', age: '18'}, c: 1};
       var text = render.handle(data);
@@ -21,8 +21,8 @@ describe('tmpl', function(){
     });
 
     it('should not use "++" or "--" in {> }', function(){
-      assert.throw(function(){tmpl.update('testScope', 'a = {> a-- }');}, TypeError);
-      assert.throw(function(){tmpl.update('testScope', 'a = {> a++ }');}, TypeError);
+      assert.throw(function(){tmpl.render('testScope', 'a = {> a-- }');}, TypeError);
+      assert.throw(function(){tmpl.render('testScope', 'a = {> a++ }');}, TypeError);
     });
 
   });
