@@ -27,9 +27,9 @@ module.exports = function(grunt) {
     return config;
   }
 
-  function wrap(name) {
+  function wrap(name, ignore) {
     var path = name ? name + '/' : '';
-    return mapSrc2DistPath(SRC_PATH + path, DIST_PATH + path);
+    return mapSrc2DistPath(SRC_PATH + path, DIST_PATH + path, ignore);
   }
 
   // Project configuration.
@@ -52,7 +52,10 @@ module.exports = function(grunt) {
           banner: modulePrefix,
           footer: moduleSuffix
         },
-        files: wrap()  // src/ to dist/
+        files: wrap(null, 'src/lib')  // src/ to dist/
+      },
+      copyLib: {
+        files: wrap('lib')
       }
     },
     uglify: {
@@ -104,7 +107,7 @@ module.exports = function(grunt) {
       },
       build: {
         files: '<%= jshint.build.src %>',
-        tasks: ['clean:build', 'concat:buildMood']
+        tasks: ['clean:build', 'concat:buildMood',  'concat:copyLib']
       }
     },
     clean: {
