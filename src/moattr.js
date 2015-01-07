@@ -33,6 +33,7 @@ moAttrs.parseScope = function(scopeElem) {
         var h = getHandler.call(elem, attr);
         callback(h.handle);
         $.extend(ret.obj, h.obj);
+        elem.removeAttribute(attrName);
       });
     });
   };
@@ -85,8 +86,14 @@ moAttrs.addRenderAttr = function(attrName, attrender) {
   };
 };
 
-moAttrs.addControlAttr = function(attrName, handle) {
-  this._controlAttrs[attrName] = handle;
+moAttrs.addControlAttr = function(attrName, attrcontrol) {
+  this._controlAttrs[attrName] = function(str) {
+    var elem = this;
+    var control = tmpl.control(str);
+    return moAttrs.genControllerObj(control.names, function(scope) {
+      attrcontrol(elem, scope, control.handle);
+    });
+  };
 };
 
 moAttrs.addRenderAttr('mo-html', function(elem, scope, renderHandle) {
@@ -96,6 +103,19 @@ moAttrs.addRenderAttr('mo-html', function(elem, scope, renderHandle) {
 moAttrs.addRenderAttr('mo-text', function(elem, scope, renderHandle) {
   lazyAssign(elem, 'innerHTML', renderHandle(scope));
 });
+
+moAttrs.addRenderAttr('mo-class', function(elem, scope, renderHandle) {
+  lazyAssign(elem, 'className', renderHandle(scope));
+});
+
+
+// Has same name of attrName and element property
+var sameAttrs = ['id', 'type', 'value'];
+for (var i = 0; i < sameAttrs.length; i++ ) {
+  moAttrs.addRenderAttr('mo-' + sameAttrs[i], function(elem, scope, renderHandle) {
+    lazyAssign(elem, sameAttrs[i], renderHandle(scope));
+  });
+}
 
 moAttrs.addRenderAttr('mo-show', function(elem, scope, renderHandle) {
   var display = 'none';
@@ -115,55 +135,18 @@ moAttrs.addRenderAttr('mo-show', function(elem, scope, renderHandle) {
  * Control attributes.
  */
 
-moAttrs.addControlAttr('mo-click', function(str) {
-  var elem = this;
-  var control = tmpl.control(str);
-  return moAttrs.genControllerObj(control.names, function(scope) {
-    EventUtil.on(elem, 'click', function() {
-      control.handle.call(null, scope);
-    });
+moAttrs.addControlAttr('mo-click', function(elem, scope, controlHandle) {
+  EventUtil.on(elem, 'click', function() {
+    controlHandle.call(null, scope);
   });
 });
 
-// will not escape the html tags
-moAttrs.moHtml = {
-  getUpdator: function(attr) {
-    return function(scope) {
-      // 'this' is the element
-      lazyAssign(this, 'innerHTML', render(attr, scope, false));
-    };
-  }
-};
-
-// Will escape the html tags
-moAttrs.moText = {
-  getUpdator: function(attr) {
-    return function(scope) {
-      lazyAssign(this, 'innerHTML', render(attr, scope));
-    };
-  }
-};
-
-// Will escape the html tags
-moAttrs.moClass = {
-  getUpdator: function(attr) {
-    return function(scope) {
-      lazyAssign(this, 'className', render(attr, scope));
-    };
-  }
-};
-
-// Create normal attributes like 'class', 'id' ...
-var normalAttrs = ['id', 'type', 'value'];
-normalAttrs.forEach(function(name) {
-  var attrUtil = {
-    getUpdator: function(attr) {
-      return function(scope) {
-        lazyAssign(this, name, render(attr, scope));
-      };
-    }
-  };
-  moAttrs['mo' + Type.capitalize(name)] = attrUtil;  // Change to 'moId', 'moClass'...
+// PD is prevent default
+moAttrs.addControlAttr('mo-PD-click', function(elem, scope, controlHandle) {
+  EventUtil.on(elem, 'click', function(e) {
+    e.preventDefault();
+    controlHandle.call(null, scope);
+  });
 });
 
 exports.moAttrs = moAttrs;
