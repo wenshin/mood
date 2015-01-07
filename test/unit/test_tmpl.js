@@ -18,9 +18,18 @@ describe('tmpl', function(){
       assert.equal(text, 'a + b = wenshin18 and c = 10');
     });
 
-    it('should not use "++" or "--" in {> }', function(){
+    it('should return right property names and parsed text when use !', function(){
+      var render = tmpl.render('it {> me.name !== me.age } and {> !c } and {> me.name!==me.age }');
+      var data = {me: {name: 'wenshin', age: '18'}, c: 1};
+      var text = render.handle(data);
+      assert.deepEqual(render.names, ['me.name', 'me.age', 'c']);
+      assert.equal(text, 'it true and false and true');
+    });
+
+    it('should not use ";" or "++" or "--" in {> }', function(){
       assert.throw(function(){tmpl.render('a = {> a-- }');}, TypeError);
       assert.throw(function(){tmpl.render('a = {> a++ }');}, TypeError);
+      assert.throw(function(){tmpl.render('a = {> a; }');}, TypeError);
     });
 
   });
@@ -34,6 +43,18 @@ describe('tmpl', function(){
       assert.typeOf(controlObj.handle, 'Function');
       assert.equal(data.c, 2);
       assert.deepEqual(controlObj.names, ['b', 'c']);
+    });
+
+    it('should change !param to param = !param', function(){
+      var controlObj = tmpl.control('$> !b');
+      var data = {b: 3};
+      controlObj.handle(data);
+      assert.equal(data.b, false);
+      assert.deepEqual(controlObj.names, ['b']);
+    });
+
+    it('should not use ";"', function(){
+      assert.throw(function(){tmpl.control('$> a;');}, TypeError);
     });
 
   });

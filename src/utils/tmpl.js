@@ -25,7 +25,7 @@ var variableChainParser = /^[$_a-zA-Z][$_\w.]*$/;
 
 
 var code2Names = function(code) {
-  return code.split(/[^$_\w.]+/g); //可能出现['abc', '']
+  return code.split(/[^$_\w.!]+/g); //可能出现['abc', '']
 };
 
 
@@ -35,10 +35,17 @@ var array2Str = function(array) {
 
 
 var filterNames = function(names) {
-  var _names = [];
+  var _names = [], nameSet = {}, name;
   for (var i = 0; i < names.length; i++ ) {
-    if ( names[i].match(variableChainParser) ) {
-      _names.push(names[i]);
+    name = names[i];
+    if ( name === '!' ) { continue; }
+
+    name = name.replace('!', '');
+    if ( name in nameSet ) { continue; }
+
+    if ( name.match(variableChainParser) ) {
+      _names.push(name);
+      nameSet[name] = null;
     }
   }
   return _names;
@@ -56,6 +63,12 @@ tmpl.render = function render(str, data, escape) {
     for ( var i = 0; i < matchs.length; i++ ) {
       match = renderParser.exec(matchs[i]);
       code = match && match[1];
+      if ( !code ) {
+        throw new TypeError('tmpl.control parse [' + str + '] failed.');
+      }
+      if ( code.indexOf(';') !== -1 ) {
+        throw new TypeError('tmpl.control can not parse ";".');
+      }
       if ( code.indexOf('++') !== -1 || code.indexOf('--') !== -1 ) {
         throw new TypeError('Do not use ++ or -- in {> }');
       }
@@ -89,12 +102,26 @@ tmpl.control = function control(str, data) {
   var controlObj = cache[str], names;
 
   if ( !controlObj ) {
-    var match = controlParser.exec(str), codes;
+    var match = controlParser.exec(str),
+        codes,
+        varMatch, variable;
+
     codes = match && match[1];
     if ( !codes ) {
       throw new TypeError('tmpl.control parse [' + str + '] failed.');
     }
+    if ( codes.indexOf(';') !== -1 ) {
+      throw new TypeError('tmpl.control can not parse ";".');
+    }
+
     names = code2Names(codes);
+
+    if ( codes.indexOf('!') === 0 ) {
+      varMatch = /!([$_a-zA-Z][$_\w.]*)/g.exec(codes);
+      variable = varMatch && varMatch[1];
+      codes = variable ? variable + ' = !' + variable : codes;
+    }
+
     controlObj = {};
     controlObj.handle = new Function('data', 'with(data){ ' + codes + '}');
     controlObj.names = filterNames(names);
