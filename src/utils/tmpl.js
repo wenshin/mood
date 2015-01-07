@@ -21,8 +21,6 @@
 
 var tmpl = {};
 var cache = {};
-var renderParser = /\{>\s*([^{}]+?)\s*\}/g;
-var controlParser = /^\$>\s*(.+)\s*$/g;
 var variableChainParser = /^[$_a-zA-Z][$_\w.]*$/;
 
 
@@ -33,11 +31,6 @@ var code2Names = function(code) {
 
 var array2Str = function(array) {
   return '[\'' + array.join('\',\'') + '\']';
-};
-
-
-var addPrefix = function(namespace, str) {
-  return namespace + '.' + str;
 };
 
 
@@ -53,6 +46,7 @@ var filterNames = function(names) {
 
 
 tmpl.render = function render(str, data, escape) {
+  var renderParser = /\{>\s*([^{}]+?)\s*\}/g;
   var renderObj = cache[str], names = [];
 
   if ( !renderObj ) {
@@ -91,11 +85,15 @@ tmpl.render = function render(str, data, escape) {
 };
 
 tmpl.control = function control(str, data) {
+  var controlParser = /^\$>\s*(.+)\s*$/g;
   var controlObj = cache[str], names;
 
   if ( !controlObj ) {
     var match = controlParser.exec(str), codes;
     codes = match && match[1];
+    if ( !codes ) {
+      throw new TypeError('tmpl.control parse [' + str + '] failed.');
+    }
     names = code2Names(codes);
     controlObj = {};
     controlObj.handle = new Function('data', 'with(data){ ' + codes + '}');
