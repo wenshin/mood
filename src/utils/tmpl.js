@@ -25,12 +25,21 @@ var variableChainParser = /^[$_a-zA-Z][$_\w.]*$/;
 
 
 var code2Names = function(code) {
+  code = code.replace(/"[^"]+"/g, '');
   return code.split(/[^$_\w.!]+/g); //可能出现['abc', '']
 };
 
 
 var array2Str = function(array) {
   return '[\'' + array.join('\',\'') + '\']';
+};
+
+var transIllegal = function(str) {
+  return str && str.replace(/'/g, '"');
+};
+
+var getCodeFromMatch = function(match) {
+  return match && transIllegal(match[1]);
 };
 
 
@@ -56,7 +65,9 @@ tmpl.render = function render(str, data, escape) {
   var renderParser = /\{>\s*([^{}]+?)\s*\}/g;
   var renderObj = cache[str], names = [];
 
+  // Not in cache
   if ( !renderObj ) {
+    str = transIllegal(str);
     var matchs = str.match(renderParser), match, codes = [],
         code, fnBody;
 
@@ -113,6 +124,7 @@ tmpl.control = function control(str, data) {
     if ( codes.indexOf(';') !== -1 ) {
       throw new TypeError('tmpl.control can not parse ";".');
     }
+    codes = transIllegal(codes);
 
     names = code2Names(codes);
 

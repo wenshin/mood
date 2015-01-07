@@ -26,6 +26,14 @@ describe('tmpl', function(){
       assert.equal(text, 'it true and false and true');
     });
 
+    it('should return right when use \' to indicate a string', function(){
+      var render = tmpl.render('it {> \'Wenshin\' } and {> \'Yuanwen\' }');
+      var data = {me: {name: 'wenshin', age: '18'}};
+      var text = render.handle(data);
+      assert.deepEqual(render.names, []);
+      assert.equal(text, 'it Wenshin and Yuanwen');
+    });
+
     it('should not use ";" or "++" or "--" in {> }', function(){
       assert.throw(function(){tmpl.render('a = {> a-- }');}, TypeError);
       assert.throw(function(){tmpl.render('a = {> a++ }');}, TypeError);
