@@ -2,6 +2,7 @@
 
 var Log = require('./utils/log').Log;
 var ChainName = require('./utils/chainame').ChainName;
+var Helpers = require('./utils/helper').Helpers;
 var $ = require('./lib/jquery.core').jQuery;
 
 
@@ -11,7 +12,10 @@ var Scope = function(name, props) {
   // 用于缓存当前Scope对象属性的值，以让getter可以正常获得
   scope._props = {};
   scope._lastProps = {};
-  if ( props && $.isPlainObject(props) ) {
+
+  props = props || {};
+  if ( $.isPlainObject(props) ) {
+    $.extend(props, Scope.defaultHelpers);
     $.each(props, function(prop, value) {
       scope.addProp(prop, value);
     });
@@ -19,6 +23,7 @@ var Scope = function(name, props) {
 };
 
 Scope._renders = {};
+Scope.defaultHelpers = Helpers;
 
 Scope.prototype.addProp = function (name, defaultValue, renders) {
   var scope = this;
@@ -77,6 +82,10 @@ Scope.prototype.addRenderObjs = function(renderObj) {
   $.each(renderObj, function (name, renders) {
     scope.addRenders(scope.chainName(name), renders);
   });
+};
+
+Scope.prototype.helper = function(name, helper) {
+  this.addProp(name, helper);
 };
 
 Scope.prototype.triggerRenders = function(names) {

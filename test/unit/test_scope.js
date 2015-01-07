@@ -10,6 +10,10 @@ describe('Scope', function(){
   var myScope = new Scope('scope1');
   describe('#addProp', function(){
 
+    it('should get default helpers after instantiate Scope', function(){
+      assert.typeOf(myScope.defaults, 'Function');
+    });
+
     it('should get null when not assign default value', function(){
       myScope.addProp('b');
       assert.equal(myScope.b, null);
@@ -30,6 +34,15 @@ describe('Scope', function(){
       });
       myScope.c = 2;
       assert.equal(renderCalled, true);
+    });
+
+    it('should add property when call Scope.helper', function(){
+      var helperCalled = false;
+      myScope.helper('renderAbc', function() {
+        helperCalled = true;
+      });
+      myScope.renderAbc();
+      assert.equal(helperCalled, true);
     });
 
     it('should assign property success and call renders', function(){
