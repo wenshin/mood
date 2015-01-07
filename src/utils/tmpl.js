@@ -41,20 +41,19 @@ var addPrefix = function(namespace, str) {
 };
 
 
-var filterNames = function(namespace, names) {
+var filterNames = function(names) {
   var _names = [];
   for (var i = 0; i < names.length; i++ ) {
     if ( names[i].match(variableChainParser) ) {
-      _names.push(addPrefix(namespace, names[i]));
+      _names.push(names[i]);
     }
   }
   return _names;
 };
 
 
-tmpl.render = function render(namespace, str, data, escape) {
-  var cacheName = addPrefix(namespace, str);
-  var renderObj = cache[cacheName], names = [];
+tmpl.render = function render(str, data, escape) {
+  var renderObj = cache[str], names = [];
 
   if ( !renderObj ) {
     var matchs = str.match(renderParser), match, codes = [],
@@ -84,16 +83,15 @@ tmpl.render = function render(namespace, str, data, escape) {
 
     renderObj = {};
     renderObj.handle = new Function('data', 'escape', fnBody);
-    renderObj.names = filterNames(namespace, names);
-    cache[cacheName] = renderObj;
+    renderObj.names = filterNames(names);
+    cache[str] = renderObj;
   }
 
   return data ? renderObj.handle(data, escape) : renderObj;
 };
 
-tmpl.control = function control(namespace, str, data) {
-  var cacheName = addPrefix(namespace, str);
-  var controlObj = cache[cacheName], names;
+tmpl.control = function control(str, data) {
+  var controlObj = cache[str], names;
 
   if ( !controlObj ) {
     var match = controlParser.exec(str), codes;
@@ -101,8 +99,8 @@ tmpl.control = function control(namespace, str, data) {
     names = code2Names(codes);
     controlObj = {};
     controlObj.handle = new Function('data', 'with(data){ ' + codes + '}');
-    controlObj.names = filterNames(namespace, names);
-    cache[cacheName] = controlObj;
+    controlObj.names = filterNames(names);
+    cache[str] = controlObj;
   }
   return data ? controlObj.handle(data) : controlObj;
 };
