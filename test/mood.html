@@ -14,6 +14,11 @@
     <button mo-click="$> count = 0">Reset</button>
     <button mo-click="$> !show " mo-html="{> show ? 'Hide' : 'Show' }">Hide</button>
   </div>
+  <form mo-scope="myscope1">
+    <input type="text" mo-bind="$> name">
+    <label mo-html="{> name }"></label>
+  </form>
+
   </header>
 </body>
 </html>
