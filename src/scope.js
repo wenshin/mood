@@ -8,9 +8,6 @@ var $ = require('./lib/jquery.core').jQuery;
 var Scope = function(name, props) {
   var scope = this;
   scope.name = name;
-  scope.selfRenderName = '__self';
-  scope._controller = {};
-  scope._renders = {};
   // 用于缓存当前Scope对象属性的值，以让getter可以正常获得
   scope._props = {};
   scope._lastProps = {};
@@ -21,53 +18,54 @@ var Scope = function(name, props) {
   }
 };
 
+Scope._renders = {};
 
 Scope.prototype.addProp = function (name, defaultValue, renders) {
-  // 如果 defaultValue 不使用建议设置为 null。
-  var upper = this;
+  var scope = this;
   var chainedName = this.chainName(name);
-  this.addRenders(name, renders);
+  this.addRenders(chainedName, renders);
 
   Object.defineProperty(this, name, {
     set: function(value) {
-      if ( upper.propNotChanged(name, value) ) { return; }
+      if ( scope.propNotChanged(name, value) ) { return; }
 
       if ( $.isPlainObject(value) ) {
         // 创建子Scope
-        upper._setProp(name, new Scope(chainedName, value));
+        scope._setProp(name, new Scope(chainedName, value));
       } else {
-        upper._setProp(name, value);
+        scope._setProp(name, value);
       }
-      upper.trigger(name);
+      scope.triggerRenders(chainedName);
 
       Log.print(['Set ', chainedName, ': ', value], 'log');
     },
     get: function() {
       Log.print([
-        'Get ', chainedName, ': ', upper._getProp(name),
-        '; ScopeName: ', upper.name], 'log');
-      return upper._getProp(name);
+        'Get ', chainedName, ': ', scope._getProp(name),
+        '; ScopeName: ', scope.name], 'log');
+      return scope._getProp(name);
     },
   });
 
-  this._setProp(name, defaultValue);
+  // 如果 defaultValue 不使用默认赋值null。
+  this._setProp(name, defaultValue || null);
 };
 
 Scope.prototype.addRenders = function(name, renders) {
   // 当name 参数不是字符串时，也即 name 参数不传递时，保存 renders 到
-  // this.selfRenderName 的属性下。该属性下的函数列表会在任务和属性修
+  // this.name 的属性下。该属性下的函数列表会在任务和属性修
   // 改时触发。
   if ( $.type(name) !== 'string' ) {
     renders = name;
-    name = this.selfRenderName;
+    name = this.name;
   }
   renders = renders || [];
   if ( $.isFunction(renders) ) { renders = [renders]; }
 
-  if ( this._renders[name] ) {
-    this._renders[name] = this._renders[name].concat(renders);
+  if ( Scope._renders[name] ) {
+    Scope._renders[name] = Scope._renders[name].concat(renders);
   } else {
-    this._renders[name] = renders;
+    Scope._renders[name] = renders;
   }
 };
 
@@ -77,21 +75,21 @@ Scope.prototype.addRenderObjs = function(renderObj) {
   }
   var scope = this;
   $.each(renderObj, function (name, renders) {
-    scope.addRenders(name, renders);
+    scope.addRenders(scope.chainName(name), renders);
   });
 };
 
-Scope.prototype.trigger = function(names) {
+Scope.prototype.triggerRenders = function(names) {
   var renders = [], i;
   var _concat = function(array) {
     renders = renders.concat(array || []);
   };
-  if ( $.type(names) !== 'string' ) { names = [names]; } // names 是单个属性名称
+  if ( $.type(names) === 'string' ) { names = [names]; } // names 是单个属性名称
 
   for ( i = 0; i < names.length; i++ ) {
-    _concat(this._renders[names[i]]);
+    _concat(Scope._renders[names[i]]);
   }
-  _concat(this._renders[this.selfRenderName]);
+  _concat(Scope._renders[this.name]);
 
   for ( i = 0; i < renders.length; i++ ) {
     renders[i].call(this.copy());
@@ -126,19 +124,8 @@ Scope.prototype.chainName = function(propName) {
 };
 
 Scope.prototype.copy = function() {
-  // copy a scope, but if changed will not trigger update functions
-  var copy = {};
-  var props = this._props;
-  for ( var p in props ) {
-    if ( props.hasOwnProperty(p) ) {
-      if ( props[p] instanceof Scope ) {
-        copy[p] = props[p].copy();
-      } else {
-        copy[p] = props[p];
-      }
-    }
-  }
-  return copy;
+  // copy a scope, if property changed will not trigger render functions
+  return $.extend({}, this._props);
 };
 
 exports.Scope = Scope;
