@@ -85,7 +85,11 @@ Scope.prototype.addRenderObjs = function(renderObj) {
 };
 
 Scope.prototype.helper = function(name, helper) {
-  this.addProp(name, helper);
+  if ( name in this._props ) {
+    this._props[name] = helper;
+  } else {
+    this.addProp(name, helper);
+  }
 };
 
 Scope.prototype.triggerRenders = function(names) {
