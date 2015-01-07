@@ -1,27 +1,26 @@
 'use strict';
 
 var Log = require('./utils/log').Log;
+var ChainName = require('./utils/chainame').ChainName;
 var $ = require('./lib/jquery.core').jQuery;
 
 
 var Scope = function(name, props) {
-  this.name = name;
-  this.selfRenderName = '__self';
-  this.Controller = {};
-  this._renders = {};
+  var scope = this;
+  scope.name = name;
+  scope.selfRenderName = '__self';
+  scope._controller = {};
+  scope._renders = {};
   // 用于缓存当前Scope对象属性的值，以让getter可以正常获得
-  this._props = {};
-  this._lastProps = {};
+  scope._props = {};
+  scope._lastProps = {};
   if ( props && $.isPlainObject(props) ) {
     $.each(props, function(prop, value) {
-      this.addProp(prop, value);
+      scope.addProp(prop, value);
     });
   }
 };
 
-
-Scope.renders = {};
-Scope.controllers = {};
 
 Scope.prototype.addProp = function (name, defaultValue, renders) {
   // 如果 defaultValue 不使用建议设置为 null。
@@ -66,10 +65,20 @@ Scope.prototype.addRenders = function(name, renders) {
   if ( $.isFunction(renders) ) { renders = [renders]; }
 
   if ( this._renders[name] ) {
-    this._renders[name].concat(renders);
+    this._renders[name] = this._renders[name].concat(renders);
   } else {
     this._renders[name] = renders;
   }
+};
+
+Scope.prototype.addRenderObjs = function(renderObj) {
+  if ( !$.isPlainObject(renderObj) ) {
+    throw new TypeError('Scope.addRenderObjs need a plain object argument.');
+  }
+  var scope = this;
+  $.each(renderObj, function (name, renders) {
+    scope.addRenders(name, renders);
+  });
 };
 
 Scope.prototype.trigger = function(names) {
@@ -89,6 +98,16 @@ Scope.prototype.trigger = function(names) {
   }
 };
 
+Scope.prototype.runControllers = function(controllers) {
+  if ( !$.isArray(controllers) ) {
+    throw new TypeError('Scope.runControllers(controllers) need a Array argument.');
+  }
+  var scope = this;
+  $.each(controllers, function(_, control){
+    control(scope);
+  });
+};
+
 Scope.prototype._setProp = function(name, value) {
   this._lastProps[name] = this._props[name];
   this._props[name] = value;
@@ -103,7 +122,7 @@ Scope.prototype.propNotChanged = function(name, value) {
 };
 
 Scope.prototype.chainName = function(propName) {
-  return this.name + '.' + propName;
+  return ChainName.join([this.name, propName]);
 };
 
 Scope.prototype.copy = function() {

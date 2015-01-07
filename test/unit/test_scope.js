@@ -41,17 +41,20 @@ describe('Scope', function(){
 
     it('should run all renders when assign', function() {
       var scope = new Scope('scope1');
-      var render1Called =false, render2Called = false;
+      var count = 0;
       scope.addProp('a', 1, [function() {
         assert.equal(this.a, 2);
-        render1Called = true;
+        count++;
       }, function() {
         assert.equal(this.a, 2);
-        render2Called = true;
+        count++;
+      }]);
+      scope.addRenders('a', [function() {
+        assert.equal(this.a, 2);
+        count++;
       }]);
       scope.a = 2;
-      assert.equal(render1Called, true);
-      assert.equal(render2Called, true);
+      assert.equal(count, 3);
     });
 
   });
