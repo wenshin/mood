@@ -38,11 +38,6 @@ var transIllegal = function(str) {
   return str && str.replace(/'/g, '"');
 };
 
-var getCodeFromMatch = function(match) {
-  return match && transIllegal(match[1]);
-};
-
-
 var filterNames = function(names) {
   var _names = [], nameSet = {}, name;
   for (var i = 0; i < names.length; i++ ) {

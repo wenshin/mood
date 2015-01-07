@@ -33,8 +33,8 @@ Mood.addScope = function(name, obj, renders, controllers) {
   }
   var scope;
   scope = new Scope(name, obj);
-  scope.addRenderObjs(renders);
-  scope.runControllers(controllers);
+  scope._addRenderObjs(renders);
+  scope._runControllers(controllers);
   this._scopes[name] = scope;
   return scope;
 };

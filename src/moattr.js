@@ -1,6 +1,5 @@
 'use strict';
 
-var Type = require('./utils/type').Type;
 var tmpl = require('./utils/tmpl').tmpl;
 var ChainName = require('./utils/chainame').ChainName;
 var EventUtil = require('./utils/event').EventUtil;
@@ -78,8 +77,7 @@ moAttrs._controlAttrs = {};
 
 moAttrs.addRenderAttr = function(attrName, attrender) {
   this._renderAttrs[attrName] = function(str) {
-    var elem = this;
-    var render = tmpl.render(str);
+    var elem = this, render = tmpl.render(str);
     return moAttrs.genRenderObj(render.names, function(scope) {
       attrender(elem, scope, render.handle);
     });
@@ -88,8 +86,7 @@ moAttrs.addRenderAttr = function(attrName, attrender) {
 
 moAttrs.addControlAttr = function(attrName, attrcontrol) {
   this._controlAttrs[attrName] = function(str) {
-    var elem = this;
-    var control = tmpl.control(str);
+    var elem = this, control = tmpl.control(str);
     return moAttrs.genControllerObj(control.names, function(scope) {
       attrcontrol(elem, scope, control.handle);
     });
@@ -113,8 +110,8 @@ moAttrs.addRenderAttr('mo-class', function(elem, scope, renderHandle) {
 var sameAttrs = ['id', 'type', 'value'];
 for (var i = 0; i < sameAttrs.length; i++ ) {
   (function() {
-    var tmpAttr = sameAttrs[i];
-    moAttrs.addRenderAttr('mo-' + sameAttrs[i], function(elem, scope, renderHandle) {
+    var tmpAttr = sameAttrs[i];  // 注意这里的用法保证tmpAttr是当前域得值
+    moAttrs.addRenderAttr('mo-' + tmpAttr, function(elem, scope, renderHandle) {
       lazyAssign(elem, tmpAttr, renderHandle(scope));
     });
   })();
@@ -137,19 +134,40 @@ moAttrs.addRenderAttr('mo-show', function(elem, scope, renderHandle) {
 /*
  * Control attributes.
  */
+var events = [
+  'click', 'change', 'hover', 'mouseover', 'keypress',
+  'keyup', 'keydown', 'mouseup', 'mousedown', 'submit'];
 
-moAttrs.addControlAttr('mo-click', function(elem, scope, controlHandle) {
-  EventUtil.on(elem, 'click', function() {
-    controlHandle.call(null, scope);
-  });
-});
 
-// PD is prevent default
-moAttrs.addControlAttr('mo-PD-click', function(elem, scope, controlHandle) {
-  EventUtil.on(elem, 'click', function(e) {
-    e.preventDefault();
-    controlHandle.call(null, scope);
+for (var i = 0; i < events.length; i++ ) {
+  (function(){
+    var eventName = events[i];
+    moAttrs.addControlAttr('mo-' + eventName, function(elem, scope, controlHandle) {
+      EventUtil.on(elem, eventName, function() {
+        controlHandle.call(elem, scope);
+      });
+    });
+
+    // PD is prevent default
+    moAttrs.addControlAttr('mo-PD-' + eventName, function(elem, scope, controlHandle) {
+      EventUtil.on(elem, eventName, function(e) {
+        e.preventDefault();
+        controlHandle.call(elem, scope);
+      });
+    });
+  })();
+}
+
+/*
+ * Two side bind for mo-bind.
+ */
+moAttrs._controlAttrs['mo-bind'] = function(str) {
+  var elem = this, control = tmpl.control(str);
+  return moAttrs.genControllerObj(control.names, function(scope) {
+    EventUtil.on(elem, 'keyup', function() {
+      scope[control.names[0]] = elem.value;
+    });
   });
-});
+};
 
 exports.moAttrs = moAttrs;

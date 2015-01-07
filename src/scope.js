@@ -8,11 +8,10 @@ var $ = require('./lib/jquery.core').jQuery;
 
 var Scope = function(name, props) {
   var scope = this;
-  scope.name = name;
+  scope.__name = name;
   // 用于缓存当前Scope对象属性的值，以让getter可以正常获得
   scope._props = {};
   scope._lastProps = {};
-
   props = props || {};
   if ( $.isPlainObject(props) ) {
     $.extend(props, Scope.defaultHelpers);
@@ -30,24 +29,17 @@ Scope.prototype.addProp = function (name, defaultValue, renders) {
   var chainedName = this.chainName(name);
   this.addRenders(chainedName, renders);
 
+  if ( name in scope ) {
+    throw new TypeError('Property [' + name + '] exeisted!');
+  }
   Object.defineProperty(this, name, {
     set: function(value) {
-      if ( scope.propNotChanged(name, value) ) { return; }
-
-      if ( $.isPlainObject(value) ) {
-        // 创建子Scope
-        scope._setProp(name, new Scope(chainedName, value));
-      } else {
-        scope._setProp(name, value);
-      }
-      scope.triggerRenders(chainedName);
-
-      Log.print(['Set ', chainedName, ': ', value], 'log');
+      scope._setProperty(name, value);
     },
     get: function() {
       Log.print([
-        'Get ', chainedName, ': ', scope._getProp(name),
-        '; ScopeName: ', scope.name], 'log');
+        'Get ', name, ': ', scope._getProp(name),
+        '; ScopeName: ', scope.__name], 'log');
       return scope._getProp(name);
     },
   });
@@ -56,13 +48,30 @@ Scope.prototype.addProp = function (name, defaultValue, renders) {
   this._setProp(name, defaultValue || null);
 };
 
+Scope.prototype._setProperty = function(name, value) {
+  var scope = this;
+  var chainedName = scope.chainName(name);
+
+  if ( scope._propNotChanged(name, value) ) { return; }
+
+  if ( $.isPlainObject(value) ) {
+    // 创建子Scope
+    scope._setProp(name, new Scope(chainedName, value));
+  } else {
+    scope._setProp(name, value);
+  }
+  scope.triggerRenders(chainedName);
+
+  Log.print(['Set ', chainedName, ': ', value], 'log');
+};
+
 Scope.prototype.addRenders = function(name, renders) {
   // 当name 参数不是字符串时，也即 name 参数不传递时，保存 renders 到
-  // this.name 的属性下。该属性下的函数列表会在任务和属性修
+  // this.__name 的属性下。该属性下的函数列表会在任务和属性修
   // 改时触发。
   if ( $.type(name) !== 'string' ) {
     renders = name;
-    name = this.name;
+    name = this.__name;
   }
   renders = renders || [];
   if ( $.isFunction(renders) ) { renders = [renders]; }
@@ -74,9 +83,9 @@ Scope.prototype.addRenders = function(name, renders) {
   }
 };
 
-Scope.prototype.addRenderObjs = function(renderObj) {
+Scope.prototype._addRenderObjs = function(renderObj) {
   if ( !$.isPlainObject(renderObj) ) {
-    throw new TypeError('Scope.addRenderObjs need a plain object argument.');
+    throw new TypeError('Scope._addRenderObjs need a plain object argument.');
   }
   var scope = this;
   $.each(renderObj, function (name, renders) {
@@ -102,14 +111,14 @@ Scope.prototype.triggerRenders = function(names) {
   for ( i = 0; i < names.length; i++ ) {
     _concat(Scope._renders[names[i]]);
   }
-  _concat(Scope._renders[this.name]);
+  _concat(Scope._renders[this.__name]);
 
   for ( i = 0; i < renders.length; i++ ) {
-    renders[i].call(null, this.copy());
+    renders[i].call(null, this._copy());
   }
 };
 
-Scope.prototype.runControllers = function(controllers) {
+Scope.prototype._runControllers = function(controllers) {
   if ( !$.isArray(controllers) ) {
     throw new TypeError('Scope.runControllers(controllers) need a Array argument.');
   }
@@ -128,15 +137,15 @@ Scope.prototype._getProp = function(name) {
   return this._props[name];
 };
 
-Scope.prototype.propNotChanged = function(name, value) {
+Scope.prototype._propNotChanged = function(name, value) {
   return this._props[name] === value;
 };
 
 Scope.prototype.chainName = function(propName) {
-  return ChainName.join([this.name, propName]);
+  return ChainName.join([this.__name, propName]);
 };
 
-Scope.prototype.copy = function() {
+Scope.prototype._copy = function() {
   // copy a scope, if property changed will not trigger render functions
   return $.extend({}, this._props);
 };
