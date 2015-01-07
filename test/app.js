@@ -6,7 +6,13 @@ require.config({
 require( ['mood'], function(mood) {
   'use strict';
 
-  // var myScope = mood.Mood.getScope('myscope');
-  // myScope.count = 2;
+  // 不设置Scope的初始值
+  // mood.Mood.config({bootstrap: true});
+
+
+  // 设置Scope的初始值
+  mood.Mood.bootstrap({
+    'myscope': { show: true, count: 0 }
+  });
 
 });

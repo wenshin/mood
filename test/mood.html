@@ -8,11 +8,11 @@
 <body>
   <header>
   <div mo-scope="myscope">
-    <div mo-html="The Count is {> count } :)!" mo-show="{> show }" style="display: none;">Click Button to add 1!</div>
+    <div mo-html="The Count is {> count } :)!" mo-show="{> show }">Click Button to add 1!</div>
     <!-- <button mo-click="$> count++">Click</button> -->
     <button mo-click="$> count++">Click</button>
     <button mo-click="$> count = 0">Reset</button>
-    <button mo-click="$> !show " mo-html="{> show ? 'Hide' : 'Show' }">Show</button>
+    <button mo-click="$> !show " mo-html="{> show ? 'Hide' : 'Show' }">Hide</button>
     <form>
       <input type="text" name="user" id="" mo-value="{> new.user }">
       <input type="text" name="email" id="" mo-value="{> new.email }">
