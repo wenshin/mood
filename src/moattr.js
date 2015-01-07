@@ -112,9 +112,12 @@ moAttrs.addRenderAttr('mo-class', function(elem, scope, renderHandle) {
 // Has same name of attrName and element property
 var sameAttrs = ['id', 'type', 'value'];
 for (var i = 0; i < sameAttrs.length; i++ ) {
-  moAttrs.addRenderAttr('mo-' + sameAttrs[i], function(elem, scope, renderHandle) {
-    lazyAssign(elem, sameAttrs[i], renderHandle(scope));
-  });
+  (function() {
+    var tmpAttr = sameAttrs[i];
+    moAttrs.addRenderAttr('mo-' + sameAttrs[i], function(elem, scope, renderHandle) {
+      lazyAssign(elem, tmpAttr, renderHandle(scope));
+    });
+  })();
 }
 
 moAttrs.addRenderAttr('mo-show', function(elem, scope, renderHandle) {
