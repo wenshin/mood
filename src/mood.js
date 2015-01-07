@@ -13,7 +13,7 @@ Mood._scopes = {};
 
 Mood._config = {
   debug: false,
-  bootstrap: true
+  bootstrap: false
 };
 
 
@@ -39,14 +39,15 @@ Mood.addScope = function(name, obj, renders, controllers) {
   return scope;
 };
 
-Mood.bootstrap = function() {
+Mood.bootstrap = function(defaultValues) {
+  defaultValues = defaultValues || {};
   var scopeElems = doc.querySelectorAll(moAttrs.scopeSelector);
   var scopeParams;
 
   $.each(scopeElems, function(_, elem) {
     var scopeName = elem.getAttribute(moAttrs.SCOPE_ATTR);
     scopeParams = moAttrs.parseScope(elem);
-    Mood.addScope(scopeName, scopeParams.obj,
+    Mood.addScope(scopeName, $.extend(true, scopeParams.obj, defaultValues[scopeName]),
                   scopeParams.renders, scopeParams.controllers);
   });
   return scopeParams;
