@@ -75,21 +75,45 @@ moAttrs.genControllerObj = function(names, handle) {
 moAttrs._renderAttrs = {};
 moAttrs._controlAttrs = {};
 
-moAttrs.addUpdateAttr = function(attrName, handle) {
-  this._renderAttrs[attrName] = handle;
+moAttrs.addRenderAttr = function(attrName, attrender) {
+  this._renderAttrs[attrName] = function(str) {
+    var elem = this;
+    var render = tmpl.render(str);
+    return moAttrs.genRenderObj(render.names, function(scope) {
+      attrender(elem, scope, render.handle);
+    });
+  };
 };
 
 moAttrs.addControlAttr = function(attrName, handle) {
   this._controlAttrs[attrName] = handle;
 };
 
-moAttrs.addUpdateAttr('mo-html', function(str) {
-  var elem = this;
-  var render = tmpl.render(str);
-  return moAttrs.genRenderObj(render.names, function(scope) {
-    lazyAssign(elem, 'innerHTML', render.handle(scope, false));
-  });
+moAttrs.addRenderAttr('mo-html', function(elem, scope, renderHandle) {
+  lazyAssign(elem, 'innerHTML', renderHandle(scope, false));
 });
+
+moAttrs.addRenderAttr('mo-text', function(elem, scope, renderHandle) {
+  lazyAssign(elem, 'innerHTML', renderHandle(scope));
+});
+
+moAttrs.addRenderAttr('mo-show', function(elem, scope, renderHandle) {
+  var display = 'none';
+  var value = renderHandle(scope);
+  var falseValues = {
+    '[object Object]': null,
+    '0': null, 'false': null, 'NaN': null,
+  };
+  if ( value && !( value in falseValues ) ) {
+    display = '';
+  }
+  lazyAssign(elem.style, 'display', display);
+});
+
+
+/*
+ * Control attributes.
+ */
 
 moAttrs.addControlAttr('mo-click', function(str) {
   var elem = this;
