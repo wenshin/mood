@@ -7,67 +7,68 @@ var Scope = require('../../dist/scope').Scope;
 
 describe('Scope', function(){
 
-  var scope = new Scope('scope1');
+  var myScope = new Scope('scope1');
   describe('#addProp', function(){
 
     it('should get null when not assign default value', function(){
-      scope.addProp('b');
-      assert.equal(scope.b, null);
+      myScope.addProp('b');
+      assert.equal(myScope.b, null);
     });
 
     it('should success add default value for property', function(){
-      scope.addProp('a', 1);
-      assert.equal(scope.a, 1);
+      myScope.addProp('a', 1);
+      assert.equal(myScope.a, 1);
+    });
+
+    it('should run the render added by addProp when assign value', function() {
+      // 在添加属性时添加的渲染函数，触发成功，且render中的this是null, scope的赋值
+      var renderCalled = false;
+      myScope.addProp('c', 1, function(scope) {
+        assert.equal(scope.c, 2);
+        assert.equal(this, null);
+        renderCalled = true;
+      });
+      myScope.c = 2;
+      assert.equal(renderCalled, true);
     });
 
     it('should assign property success and call renders', function(){
       var renderCalled = false;
-      scope.addRenders(scope.chainName('a'), function() {
-        assert.equal(this.a, 2);
-        assert.notTypeOf(this, 'Scope');
+      myScope.addRenders(myScope.chainName('a'), function(scope) {
+        assert.equal(scope.a, 2);
+        assert.notTypeOf(scope, 'Scope');
         renderCalled = true;
       });
-      scope.a = 2;
-      assert.equal(renderCalled, true);
-    });
-
-    it('should run the render added by addProp when assign value', function() {
-      // 在添加属性时添加的渲染函数，触发成功，且render中的this是scope的赋值
-      var renderCalled = false;
-      scope.addProp('c', 1, function() {
-        assert.equal(this.c, 2);
-        renderCalled = true;
-      });
-      scope.c = 2;
+      myScope.a = 2;
       assert.equal(renderCalled, true);
     });
 
     it('should run the boot scope render when assigning property', function() {
       var renderCalled = false;
       // 触发添加根 Scope 的渲染函数
-      scope.addRenders(function() {
-        assert.equal(this.b, 2);
+      myScope.addRenders(function(scope) {
+        assert.equal(scope.b, 2);
         renderCalled = true;
       });
-      scope.b = 2;
+      myScope.b = 2;
       assert.equal(renderCalled, true);
     });
 
     it('should run all renders when assign', function() {
       var count = 0;
-      scope.addProp('d', 1, [function() {
-        assert.equal(this.d, 2);
+      myScope.addProp('d', 1, [function(scope) {
+        assert.equal(scope.d, 2);
         count++;
-      }, function() {
-        assert.equal(this.d, 2);
-        count++;
-      }]);
-      scope.addRenders(scope.chainName('d'), [function() {
-        assert.equal(this.d, 2);
+      }, function(scope) {
+        assert.equal(scope.d, 2);
         count++;
       }]);
-      assert.equal(scope.d, 1);
-      scope.d = 2;
+      myScope.addRenders(myScope.chainName('d'), function(scope) {
+        assert.equal(scope.d, 2);
+        count++;
+      });
+      assert.equal(myScope.d, 1);
+      myScope.d = 2;
       assert.equal(count, 3);
     });
 

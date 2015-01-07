@@ -92,7 +92,7 @@ Scope.prototype.triggerRenders = function(names) {
   _concat(Scope._renders[this.name]);
 
   for ( i = 0; i < renders.length; i++ ) {
-    renders[i].call(this.copy());
+    renders[i].call(null, this.copy());
   }
 };
 
