@@ -1,54 +1,60 @@
 'use strict';
 
-var scope = require('./scope');
-var hook = require('./hook');
-var bootstrap = require('./bootstrap');
-var Type = require('./utils/type').Type;
+var doc = document;
+var Scope = require('./scope').Scope;
 var Log = require('./utils/log').Log;
-var win = window || {};
+var MoErrors = require('./error').MoErrors;
+var moAttrs = require('./moattr').moAttrs;
+var $ = require('./lib/jquery.core').jQuery;
 
-// Mood constructor
-function Mood(name) {
-  var mood = this;
-  this.rootScope = new scope.Scope(name || '', function(name) {
-    hook.Manager.run(name);
-  });
-  bootstrap.initScope(function(scopeName, schema, hooks){
-    mood.createScope(scopeName, schema, null, hooks);
-  });
-  win.moApp = this;
-}
+var Mood = {};
+
+Mood._scopes = {};
 
 Mood._config = {
-  debug: false
+  debug: false,
+  bootstrap: true
 };
 
+
 Mood.config = function(option) {
-  for ( var p in option ) {
-    if ( option.hasOwnProperty(p) ) {
-      Mood._config[p] = option[p];
-    }
-  }
+  $.extend(Mood._config, option);
   Log.debug = Mood._config.debug;
 };
 
-Mood.prototype.createScope = function(name, schema, controllers, hooks) {
-  // <params schema>: is a Object or model structure
-  var scope = this.addScope(name, schema);
 
-  // Must before controller
-  hooks = Type.toArray(hooks);
-  hook.Manager.add(scope, hooks);
+Mood.getScope = function(name) {
+  return this._scopes[name];
+};
+
+Mood.addScope = function(name, obj, renders, controllers) {
+  if ( name in this._scopes ) {
+    throw MoErrors.ScopeRepeatError('Do not repeat scope name!');
+  }
+  var scope;
+  scope = new Scope(name, obj);
+  scope.addRenderObjs(renders);
+  scope.runControllers(controllers);
+  this._scopes[name] = scope;
   return scope;
 };
 
-Mood.prototype.getScope = function(name) {
-  return this.rootScope[name];
+Mood.bootstrap = function() {
+  var scopeElems = doc.querySelectorAll(moAttrs.scopeSelector);
+  var scopeParams;
+
+  $.each(scopeElems, function(_, elem) {
+    var scopeName = elem.getAttribute(moAttrs.SCOPE_ATTR);
+    scopeParams = moAttrs.parseScope(elem);
+    Mood.addScope(scopeName, scopeParams.obj,
+                  scopeParams.renders, scopeParams.controllers);
+  });
+  return scopeParams;
 };
 
-Mood.prototype.addScope = function(name, schema) {
-  this.rootScope.addProp(name, schema);
-  return this.rootScope[name];
-};
+// 默认初始化项目
+if ( Mood._config.bootstrap ) {
+  Mood.bootstrap();
+}
 
 exports.Mood = Mood;
