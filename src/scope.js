@@ -95,7 +95,7 @@ Scope.prototype._addRenderObjs = function(renderObj) {
 
 Scope.prototype.helper = function(name, helper) {
   if ( name in this._props ) {
-    this._props[name] = helper;
+    this._setProp(name, helper);
   } else {
     this.addProp(name, helper);
   }

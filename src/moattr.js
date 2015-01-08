@@ -164,7 +164,7 @@ for (var i = 0; i < events.length; i++ ) {
 moAttrs._controlAttrs['mo-bind'] = function(str) {
   var elem = this, control = tmpl.control(str);
   return moAttrs.genControllerObj(control.names, function(scope) {
-    EventUtil.on(elem, 'keyup', function() {
+    EventUtil.on(elem, 'keyup keydown', function() {
       scope[control.names[0]] = elem.value;
     });
   });
