@@ -15,9 +15,8 @@ require( ['mood'], function(mood) {
     'myscope': { show: true, count: 0 }
   });
 
-  var myScope = mood.Mood.getScope('myscope');
-  myScope.helper('multi2', function(value) {
-    value = parseInt(value);
-    return value * 2;
+  var myScope1 = mood.Mood.getScope('myscope1');
+  myScope1.helper('vibrate', function(price, preferPrice, rate) {
+    return this.floatFormat(+price + (price - preferPrice) * rate, 2);
   });
 });

@@ -15,8 +15,24 @@
     <button mo-click="$> !show " mo-html="{> show ? 'Hide' : 'Show' }">Hide</button>
   </div>
   <form mo-scope="myscope1">
-    <input type="text" mo-bind="$> name">
-    <label mo-html="{> name }"></label>
+    <label>现价</label>
+    <input type="text" mo-bind="$> price">
+    <label>参考价</label>
+    <input type="text" mo-bind="$> referPrice">
+    <h3>可能的涨幅</h3>
+    <p>+32%：
+      <span mo-html="{> vibrate(price, referPrice, 0.32) }"></span></p>
+    <p>+50%：
+      <span mo-html="{> vibrate(price, referPrice, 0.50) }"></span></p>
+    <p>+62%：
+      <span mo-html="{> vibrate(price, referPrice, 0.62) }"></span></p>
+    <h3>可能的跌幅</h3>
+    <p>-32%：
+      <span mo-html="{> vibrate(price, referPrice, -0.32) }"></span></p>
+    <p>-50%：
+      <span mo-html="{> vibrate(price, referPrice, -0.50) }"></span></p>
+    <p>-62%：
+      <span mo-html="{> vibrate(price, referPrice, -0.62) }"></span></p>
   </form>
 
   </header>
