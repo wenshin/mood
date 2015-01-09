@@ -10,7 +10,12 @@ exports.Helpers = {
     return _num ? Math.round( _num * v ) / v : num;
   },
   toFloat: function(str) {
-    var _num = parseFloat(str);
-    return _num || 0;
+    var _num;
+    try {
+      _num = parseFloat(str) || 0;
+    } catch (err) {
+      _num = 0;
+    }
+    return _num;
   }
 };

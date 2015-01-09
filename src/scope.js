@@ -93,15 +93,24 @@ Scope.prototype._addRenderObjs = function(renderObj) {
   });
 };
 
-Scope.prototype.helper = function(name, helper) {
+Scope.prototype.helper = function(name, helper, triggerProps) {
   if ( name in this._props ) {
     this._setProp(name, helper);
   } else {
     this.addProp(name, helper);
   }
+  if ( $.isArray(triggerProps) ) {
+    var scope = this;
+    $.each(triggerProps, function(i, v) {
+      scope.addRenders(scope.chainName(v), function() {
+        scope.triggerRenders(scope.chainName(name));
+      });
+    });
+  }
 };
 
 Scope.prototype.triggerRenders = function(names) {
+  // names 必须是包括当前scope前缀的名称，如myscope.helper。
   var renders = [], i;
   var _concat = function(array) {
     renders = renders.concat(array || []);
