@@ -9,12 +9,16 @@ var lazyAssign = function(obj, name, assign) {
   if( obj[name] !== assign ) { obj[name] = assign; }
 };
 
+var mo = function(name) {
+  return 'mo-' + name;
+};
+
 var attrSelector = function(attr, value) {
   value = value ? '="' + value + '"' : '';
   return ['[', attr, value, ']'].join('');
 };
 
-var SCOPE_ATTR = 'mo-scope';
+var SCOPE_ATTR = mo('scope');
 var moAttrs = {};
 
 moAttrs.SCOPE_ATTR = SCOPE_ATTR;
@@ -93,15 +97,15 @@ moAttrs.addControlAttr = function(attrName, attrcontrol) {
   };
 };
 
-moAttrs.addRenderAttr('mo-html', function(elem, scope, renderHandle) {
+moAttrs.addRenderAttr(mo('html'), function(elem, scope, renderHandle) {
   lazyAssign(elem, 'innerHTML', renderHandle(scope, false));
 });
 
-moAttrs.addRenderAttr('mo-text', function(elem, scope, renderHandle) {
+moAttrs.addRenderAttr(mo('text'), function(elem, scope, renderHandle) {
   lazyAssign(elem, 'innerHTML', renderHandle(scope));
 });
 
-moAttrs.addRenderAttr('mo-class', function(elem, scope, renderHandle) {
+moAttrs.addRenderAttr(mo('class'), function(elem, scope, renderHandle) {
   lazyAssign(elem, 'className', renderHandle(scope));
 });
 
@@ -111,13 +115,13 @@ var sameAttrs = ['id', 'type', 'value'];
 for (var i = 0; i < sameAttrs.length; i++ ) {
   (function() {
     var tmpAttr = sameAttrs[i];  // 注意这里的用法保证tmpAttr是当前域得值
-    moAttrs.addRenderAttr('mo-' + tmpAttr, function(elem, scope, renderHandle) {
+    moAttrs.addRenderAttr(mo(tmpAttr), function(elem, scope, renderHandle) {
       lazyAssign(elem, tmpAttr, renderHandle(scope));
     });
   })();
 }
 
-moAttrs.addRenderAttr('mo-show', function(elem, scope, renderHandle) {
+moAttrs.addRenderAttr(mo('show'), function(elem, scope, renderHandle) {
   var display = 'none';
   var value = renderHandle(scope);
   var falseValues = {
@@ -142,14 +146,14 @@ var events = [
 for (var i = 0; i < events.length; i++ ) {
   (function(){
     var eventName = events[i];
-    moAttrs.addControlAttr('mo-' + eventName, function(elem, scope, controlHandle) {
+    moAttrs.addControlAttr(mo(eventName), function(elem, scope, controlHandle) {
       EventUtil.on(elem, eventName, function() {
         controlHandle.call(elem, scope);
       });
     });
 
     // PD is prevent default
-    moAttrs.addControlAttr('mo-PD-' + eventName, function(elem, scope, controlHandle) {
+    moAttrs.addControlAttr(mo('PD-' + eventName), function(elem, scope, controlHandle) {
       EventUtil.on(elem, eventName, function(e) {
         e.preventDefault();
         controlHandle.call(elem, scope);
@@ -159,15 +163,19 @@ for (var i = 0; i < events.length; i++ ) {
 }
 
 /*
- * Two side bind for mo-bind.
+ * Two side data bind.
  */
-moAttrs._controlAttrs['mo-bind'] = function(str) {
+moAttrs._controlAttrs[mo('bind')] = function(str) {
   var elem = this, control = tmpl.control(str);
+  var parserAttr = mo('bind-parse');
+  var parser = elem.getAttribute(parserAttr);
+  elem.removeAttribute(parserAttr);
   return moAttrs.genControllerObj(control.names, function(scope) {
     EventUtil.on(elem, 'keyup keydown', function() {
-      scope[control.names[0]] = elem.value;
+      scope[control.names[0]] = scope[parser](elem.value);
     });
   });
 };
+
 
 exports.moAttrs = moAttrs;
