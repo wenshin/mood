@@ -13,15 +13,17 @@ require( ['mood'], function(mood) {
   // 设置Scope的初始值
   mood.Mood.bootstrap({
     'myscope': { show: true, count: 0 },
-    'myscope1': { price: 0, buyPrice: 0, referPrice: 0 },
+    'myscope1': { lowPrice: 0, buyPrice: 0, highPrice: 0 },
   });
 
   var myScope1 = mood.Mood.getScope('myscope1'),
-      triggerProps = ['price', 'buyPrice', 'referPrice'];
+      triggerProps = ['lowPrice', 'buyPrice', 'highPrice'];
 
   myScope1.helper('vibrate', function(rate) {
-    var price = this.toFloat(this.price) || 0, referPrice = this.toFloat(this.referPrice);
-    return this.floatFormat(price + (price - referPrice) * rate, 2);
+    var lowPrice = this.toFloat(this.lowPrice) || 0,
+        highPrice = this.toFloat(this.highPrice),
+        basePrice = rate > 0 ? lowPrice : highPrice;
+    return this.floatFormat(basePrice + (highPrice - lowPrice) * rate, 2);
   }, triggerProps);
 
   myScope1.helper('earn', function(rate) {
@@ -29,5 +31,11 @@ require( ['mood'], function(mood) {
     if ( !buyPrice ) { return 0; }
     return this.floatFormat((vPrice - buyPrice) / buyPrice * 100, 2);
   }, triggerProps);
+
+  myScope1.helper('nowEarn', function() {
+    var price = this.toFloat(this.price), buyPrice = this.toFloat(this.buyPrice);
+    if ( !buyPrice ) { return 0; }
+    return this.floatFormat((price - buyPrice) / buyPrice * 100, 2);
+  }, ['price', 'buyPrice']);
 
 });

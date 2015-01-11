@@ -15,13 +15,18 @@
     <button mo-click="$> !show " mo-html="{> show ? 'Hide' : 'Show' }">Hide</button>
   </div>
   <form mo-scope="myscope1">
-    <label>现价</label>
-    <input type="text" mo-bind="$> price">
-    <label>参考价</label>
-    <input type="text" mo-bind="$> referPrice">
+    <h2>回撤计算</h2>
+    <label>参考低价</label>
+    <input type="text" mo-bind="$> lowPrice">
+    <label>参考高价</label>
+    <input type="text" mo-bind="$> highPrice">
     <label>买入价</label>
     <input type="text" mo-bind="$> buyPrice">
-    <h3>可能的向上调整</h3>
+    <label>现价</label>
+    <input type="text" mo-bind="$> price">
+    <h3>当前盈利</h3>
+    <p><span mo-html="{> nowEarn() }"></span>%</p>
+    <h3>下行低位向上回撤</h3>
     <p>+32%：
       <span mo-html="{> vibrate(0.32) }"></span>元。
       参考盈利：<span mo-html="{> earn(0.32)}"></span>%。
@@ -34,7 +39,7 @@
       <span mo-html="{> vibrate(0.62) }"></span>元。
       参考盈利：<span mo-html="{> earn(0.62)}"></span>%。
     </p>
-    <h3>可能的向下调整</h3>
+    <h3>上行高位向下回撤</h3>
     <p>-32%：
       <span mo-html="{> vibrate(-0.32) }"></span>元。
       参考盈利：<span mo-html="{> earn(-0.32)}"></span>%。
@@ -48,7 +53,6 @@
       参考盈利：<span mo-html="{> earn(-0.62)}"></span>%。
     </p>
   </form>
-
   </header>
 </body>
 </html>
