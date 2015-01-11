@@ -1,4 +1,4 @@
 bower_components
 node_modules
-dist
+dist/unit
 *DS_Store

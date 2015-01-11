@@ -1,5 +1,5 @@
 require.config({
-  baseUrl: '../dist',
+  baseUrl: '../dist/build',
   waitSeconds: 15
 });
 

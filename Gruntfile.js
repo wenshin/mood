@@ -3,7 +3,7 @@ module.exports = function(grunt) {
   'use strict';
 
   var SRC_PATH = 'src/';
-  var DIST_PATH = 'dist/';
+  var DIST_PATH = 'dist/unit/';
   var PREFIX = '.prefix';
   var SUFFIX = '.suffix';
 
@@ -47,7 +47,7 @@ module.exports = function(grunt) {
         banner: '<%= banner %>',
         stripBanners: true
       },
-      buildMood: {
+      unit: {
         options: {
           banner: modulePrefix,
           footer: moduleSuffix
@@ -104,11 +104,11 @@ module.exports = function(grunt) {
       },
       build: {
         files: '<%= jshint.build.src %>',
-        tasks: ['clean:build', 'concat:buildMood']
+        tasks: ['clean:build', 'concat:unit']
       }
     },
     clean: {
-      build: ['dist/**/*.js']
+      build: ['dist/unit/**/*.js']
     }
   });
 
