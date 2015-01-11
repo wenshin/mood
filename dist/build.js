@@ -1,5 +1,5 @@
 ({
-  baseUrl: './unit',
+  baseUrl: './.tmp',
   dir: './build',
   optimize: 'uglify2',
   removeCombined: true,
@@ -7,10 +7,10 @@
     {
       name: 'mood',
       include: [
-        'scope', 'error', 'moattr',
-        'utils/chainame', 'utils/helper', 'utils/processor',
-        'utils/type', 'utils/event', 'utils/log', 'utils/tmpl',
-        'lib/jquery.core'
+        './scope', './error', './moattr',
+        './utils/chainame', './utils/helper', './utils/processor',
+        './utils/type', './utils/event', './utils/log', './utils/tmpl',
+        './lib/jquery.core'
       ]
     }
   ]
