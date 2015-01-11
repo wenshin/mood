@@ -1,17 +1,13 @@
 ({
   baseUrl: './.tmp',
-  dir: './build',
   optimize: 'uglify2',
   removeCombined: true,
-  modules: [
-    {
-      name: 'mood',
-      include: [
-        './scope', './error', './moattr',
-        './utils/chainame', './utils/helper', './utils/processor',
-        './utils/type', './utils/event', './utils/log', './utils/tmpl',
-        './lib/jquery.core'
-      ]
-    }
-  ]
+  name: 'mood',
+  include: [
+    'lib/jquery.core',
+    'utils/log', 'utils/chainame', 'utils/helper',
+    'utils/processor', 'utils/event', 'utils/tmpl',
+    'scope', 'error', 'moattr'
+  ],
+  out: './build/mood.min.js'
 })

@@ -1,6 +1,6 @@
 'use strict';
 
-var Type = require('./type').Type;
+var $ = require('../lib/jquery.core').jQuery;
 
 var Log = {
   debug: false,
@@ -10,7 +10,7 @@ var Log = {
       return;
     }
     // TODO: to be more beautyful
-    if ( Type.isArray(msg) ) {
+    if ( $.isArray(msg) ) {
       msg = '[Mood] ' + msg.join('');
     }
     console[type](msg);

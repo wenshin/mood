@@ -1,6 +1,10 @@
 #!/bin/sh
 
-rm -rf .tmp
+cd .. && grunt test
+
+cd dist
+rm -r build
 cp -r unit .tmp
-sed -i -e "s/\.\///g" `grep "./" -rl .tmp`
 r.js -o build.js
+r.js -o build.js optimize=none out=./build/mood.js
+rm -rf .tmp
