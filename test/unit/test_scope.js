@@ -3,7 +3,7 @@
 'use strict';
 
 var assert = require('chai').assert;
-var Scope = require('../../dist/unit/scope').Scope;
+var Scope = require('../../src/scope').Scope;
 
 describe('Scope', function(){
 

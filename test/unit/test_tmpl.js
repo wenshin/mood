@@ -3,7 +3,7 @@
 'use strict';
 
 var assert = require('chai').assert;
-var tmpl = require('../../dist/unit/utils/tmpl').tmpl;
+var tmpl = require('../../src/utils/tmpl').tmpl;
 
 describe('tmpl', function(){
 
