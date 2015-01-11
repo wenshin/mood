@@ -20,20 +20,20 @@ require( ['mood'], function(mood) {
       triggerProps = ['lowPrice', 'buyPrice', 'highPrice'];
 
   myScope1.helper('vibrate', function(rate) {
-    var lowPrice = this.toFloat(this.lowPrice) || 0,
-        highPrice = this.toFloat(this.highPrice),
+    var lowPrice = this.lowPrice,
+        highPrice = this.highPrice,
         basePrice = rate > 0 ? lowPrice : highPrice;
     return this.floatFormat(basePrice + (highPrice - lowPrice) * rate, 2);
   }, triggerProps);
 
   myScope1.helper('earn', function(rate) {
-    var vPrice = this.vibrate(rate), buyPrice = this.toFloat(this.buyPrice);
+    var vPrice = this.vibrate(rate), buyPrice = this.buyPrice;
     if ( !buyPrice ) { return 0; }
     return this.floatFormat((vPrice - buyPrice) / buyPrice * 100, 2);
   }, triggerProps);
 
   myScope1.helper('nowEarn', function() {
-    var price = this.toFloat(this.price), buyPrice = this.toFloat(this.buyPrice);
+    var price = this.price, buyPrice = this.buyPrice;
     if ( !buyPrice ) { return 0; }
     return this.floatFormat((price - buyPrice) / buyPrice * 100, 2);
   }, ['price', 'buyPrice']);
