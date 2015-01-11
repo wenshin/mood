@@ -3,7 +3,7 @@
 'use strict';
 
 var assert = require('chai').assert;
-var ChainName = require('../../dist/utils/chainame').ChainName;
+var ChainName = require('../../dist/unit/utils/chainame').ChainName;
 
 
 describe('ChainName', function() {
