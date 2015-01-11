@@ -17,13 +17,13 @@
   <form mo-scope="myscope1">
     <h2>回撤计算</h2>
     <label>参考低价</label>
-    <input type="text" mo-bind="$> lowPrice" mo-bind-parse"toFloat">
+    <input type="text" mo-bind="$> lowPrice" mo-bind-parse="toFloat">
     <label>参考高价</label>
-    <input type="text" mo-bind="$> highPrice" mo-bind-parse"toFloat">
+    <input type="text" mo-bind="$> highPrice" mo-bind-parse="toFloat">
     <label>买入价</label>
-    <input type="text" mo-bind="$> buyPrice" mo-bind-parse"toFloat">
+    <input type="text" mo-bind="$> buyPrice" mo-bind-parse="toFloat">
     <label>现价</label>
-    <input type="text" mo-bind="$> price" mo-bind-parse"toFloat">
+    <input type="text" mo-bind="$> price" mo-bind-parse="toFloat">
     <h3>当前盈利</h3>
     <p><span mo-html="{> nowEarn() }"></span>%</p>
     <h3>下行低位向上回撤</h3>
