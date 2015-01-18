@@ -19,12 +19,25 @@ var attrSelector = function(attr, value) {
 };
 
 var SCOPE_ATTR = mo('scope');
+var ITER_ATTR = mo('each');
+var ITER_FILTER_ATTR = mo('each-filter');
 var moAttrs = {};
 
 moAttrs.SCOPE_ATTR = SCOPE_ATTR;
 moAttrs.scopeSelector = attrSelector(SCOPE_ATTR);
 
-
+/**
+ * parseScope 解析DOM中有mo-scope标签元素中的mo-开头标签的元素
+ * @param  DOMElement scopeElem scope对象
+ * @return Object
+ *    {
+ *      obj: {}, // 解析出来的Scope具有的元素
+ *      // 渲染DOM对象的函数，该种函数不能修改Scope对象的值
+ *      renders: {"scope.prop": [render1, render2, render3]},
+ *      // 可以改变Scope对象值得函数，比如mo-click等事件函数
+ *      controllers: {"scope.prop": [controller1, controller2, controller3]},
+ *    }
+ */
 moAttrs.parseScope = function(scopeElem) {
   var ret = {renders: {}, controllers: [], obj: {}};
 
@@ -32,30 +45,33 @@ moAttrs.parseScope = function(scopeElem) {
     $.each(attrs, function(attrName, getHandler) {
       var elems = scopeElem.querySelectorAll(attrSelector(attrName));
       $.each(elems, function(_, elem) {
-        var attr = elem.getAttribute(attrName);
-        var h = getHandler.call(elem, attr);
-        callback(h.handle);
+        var attrValue = elem.getAttribute(attrName);
+        var h = getHandler.call(elem, attrValue);
+        callback(h.handler);
         $.extend(ret.obj, h.obj);
         elem.removeAttribute(attrName);
       });
     });
   };
 
-  parseAttr(this._renderAttrs, function(renders) {
-    $.each(renders, function(i, render) {
-      if ( render.name in ret.renders ) {
-        ret.renders[render.name].push(render.handle);
+  parseAttr(this._renderAttrs, function(handlers) {
+    $.each(handlers, function(i, handler) {
+      if ( handler.name in ret.renders ) {
+        ret.renders[handler.name].push(handler.handle);
       } else {
-        ret.renders[render.name] = [render.handle];
+        ret.renders[handler.name] = [handler.handle];
       }
     });
   });
-  parseAttr(this._controlAttrs, function(handle) {
-    ret.controllers.push(handle);
+  parseAttr(this._controlAttrs, function(handler) {
+    ret.controllers.push(handler);
   });
   return ret;
 };
 
+
+moAttrs._renderAttrs = {};
+moAttrs._controlAttrs = {};
 
 moAttrs.genRenderObj = function(names, handle) {
   // Return a array of every name with handle.
@@ -64,7 +80,7 @@ moAttrs.genRenderObj = function(names, handle) {
     $.extend(obj, ChainName.name2Obj(name));
     r.push({ name: name, handle: handle });
   });
-  return { handle: r, obj: obj };
+  return { handler: r, obj: obj };
 };
 
 moAttrs.genControllerObj = function(names, handle) {
@@ -73,11 +89,8 @@ moAttrs.genControllerObj = function(names, handle) {
   $.each(names, function(_, name) {
     $.extend(obj, ChainName.name2Obj(name));
   });
-  return { handle: handle, obj: obj };
+  return { handler: handle, obj: obj };
 };
-
-moAttrs._renderAttrs = {};
-moAttrs._controlAttrs = {};
 
 moAttrs.addRenderAttr = function(attrName, attrender) {
   this._renderAttrs[attrName] = function(str) {
@@ -135,6 +148,28 @@ moAttrs.addRenderAttr(mo('show'), function(elem, scope, renderHandle) {
 });
 
 
+// moAttrs._renderAttrs[ITER_ATTR] = function(str) {
+//   var elem = this, render = tmpl.render(str);
+//   var filterName = elem.getAttribute(ITER_FILTER_ATTR);
+//   function parseIterElemAttrs(iterElem) {
+//     $.each(moAttrs._renderAttrs, function(attrName, genHandler) {
+//       elem.querySelectorAll(attrSelector(attrName));
+//     });
+//   }
+//   var iterElem = elem.children[0];
+//   var iterObj = parseIterElemAttrs(iterElem);
+//   // var subiters = iterElem.querySelectorAll(attrSelector(ITER_ATTR));
+//   elem.removeChild(iterElem);
+//   return moAttrs.genRenderObj(render.names, function(scope) {
+//     var filter = scope[filterName],
+//         data = scope[render.names[0]];
+//     data = filter ? filter(data) : data;
+//     for (var i = 0; i < data.length; i++) {
+//     }
+//   });
+// };
+
+
 /*
  * Control attributes.
  */
@@ -176,6 +211,5 @@ moAttrs._controlAttrs[mo('bind')] = function(str) {
     });
   });
 };
-
 
 exports.moAttrs = moAttrs;
