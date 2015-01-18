@@ -87,16 +87,17 @@ tmpl.render = function render(str, data, escape) {
       'escape = escape === false ? escape : true;' +
       'var matchs=' + array2Str(matchs) + ', values;' +
       'with(data){ values=[' + codes + '];}' +
-      'function render() {' +
+      'function render(_values) {' +
         'var value, str=\'' + str + '\';' +
         'for ( var i = 0; i < matchs.length; i++ ) {' +
-          'value = escape && values[i].xssSafe ? values[i].xssSafe() : values[i];' +
+          'value = escape && _values[i].xssSafe ? _values[i].xssSafe() : _values[i];' +
           'str = str.replace(matchs[i], value);' +
         '}' +
         'return str;' +
       '}' +
+      // 该种模式下，可以对渲染的数据进行处理后再渲染DOM
       'if (notRender) { return {values: values, render: render}; }' +
-      'else { return render();}';
+      'else { return render(values);}';
 
     renderObj = {};
     renderObj.handle = new Function('data', 'escape', 'notRender', fnBody);

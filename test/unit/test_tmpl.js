@@ -22,7 +22,7 @@ describe('tmpl', function(){
       var render = tmpl.render('a + b = {> me.name + me.age } and c = {> c * 10 }');
       var data = {me: {name: 'wenshin', age: '18'}, c: 1};
       var renderObj = render.handle(data, null, true);
-      var text = renderObj.render();
+      var text = renderObj.render(renderObj.values);
       assert.deepEqual(renderObj.values, ['wenshin18', 10]);
       assert.equal(text, 'a + b = wenshin18 and c = 10');
     });
