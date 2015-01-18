@@ -85,17 +85,21 @@ tmpl.render = function render(str, data, escape) {
 
     fnBody =
       'escape = escape === false ? escape : true;' +
-      'var value, code, str=\'' + str + '\';' +
       'var matchs=' + array2Str(matchs) + ', values;' +
       'with(data){ values=[' + codes + '];}' +
-      'for ( var i = 0; i < matchs.length; i++ ) {' +
-        'value = escape && values[i].xssSafe ? values[i].xssSafe() : values[i];' +
-        'str = str.replace(matchs[i], value);' +
+      'function render() {' +
+        'var value, str=\'' + str + '\';' +
+        'for ( var i = 0; i < matchs.length; i++ ) {' +
+          'value = escape && values[i].xssSafe ? values[i].xssSafe() : values[i];' +
+          'str = str.replace(matchs[i], value);' +
+        '}' +
+        'return str;' +
       '}' +
-      'return str;';
+      'if (notRender) { return {values: values, render: render}; }' +
+      'else { return render();}';
 
     renderObj = {};
-    renderObj.handle = new Function('data', 'escape', fnBody);
+    renderObj.handle = new Function('data', 'escape', 'notRender', fnBody);
     renderObj.names = filterNames(names);
     cache[str] = renderObj;
   }

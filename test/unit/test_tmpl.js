@@ -18,6 +18,15 @@ describe('tmpl', function(){
       assert.equal(text, 'a + b = wenshin18 and c = 10');
     });
 
+    it('should generate a function and render right with notRender param is true', function(){
+      var render = tmpl.render('a + b = {> me.name + me.age } and c = {> c * 10 }');
+      var data = {me: {name: 'wenshin', age: '18'}, c: 1};
+      var renderObj = render.handle(data, null, true);
+      var text = renderObj.render();
+      assert.deepEqual(renderObj.values, ['wenshin18', 10]);
+      assert.equal(text, 'a + b = wenshin18 and c = 10');
+    });
+
     it('should return right property names and parsed text when use !', function(){
       var render = tmpl.render('it {> me.name !== me.age } and {> !c } and {> me.name!==me.age }');
       var data = {me: {name: 'wenshin', age: '18'}, c: 1};
