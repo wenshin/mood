@@ -5,7 +5,6 @@ var ChainName = require('./utils/chainame').ChainName;
 var Helpers = require('./utils/helper').Helpers;
 var $ = require('./lib/jquery.core').jQuery;
 
-
 var Scope = function(name, props) {
   var scope = this;
   scope.__name = name;
@@ -89,7 +88,9 @@ Scope.prototype._addRenderObjs = function(renderObj) {
   }
   var scope = this;
   $.each(renderObj, function (name, renders) {
-    scope.addRenders(scope.chainName(name), renders);
+    var chainName = scope.chainName(name);
+    scope.addRenders(chainName, renders);
+    scope.triggerRenders(chainName);
   });
 };
 
@@ -123,7 +124,11 @@ Scope.prototype.triggerRenders = function(names) {
   _concat(Scope._renders[this.__name]);
 
   for ( i = 0; i < renders.length; i++ ) {
-    renders[i].call(null, this._copy());
+    try {
+      renders[i].call(null, this._copy());
+    } catch(err) {
+      Log.print(err, 'error');
+    }
   }
 };
 

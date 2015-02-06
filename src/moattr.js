@@ -19,31 +19,20 @@ var attrSelector = function(attr, value) {
 };
 
 var SCOPE_ATTR = mo('scope');
-var ITER_ATTR = mo('each');
-var ITER_FILTER_ATTR = mo('each-filter');
+var ITER_ATTR = mo('repeat');
+// var ITER_FILTER_ATTR = mo('each-filter');
 var moAttrs = {};
 
 moAttrs.SCOPE_ATTR = SCOPE_ATTR;
 moAttrs.scopeSelector = attrSelector(SCOPE_ATTR);
 
-/**
- * parseScope 解析DOM中有mo-scope标签元素中的mo-开头标签的元素
- * @param  DOMElement scopeElem scope对象
- * @return Object
- *    {
- *      obj: {}, // 解析出来的Scope具有的元素
- *      // 渲染DOM对象的函数，该种函数不能修改Scope对象的值
- *      renders: {"scope.prop": [render1, render2, render3]},
- *      // 可以改变Scope对象值得函数，比如mo-click等事件函数
- *      controllers: {"scope.prop": [controller1, controller2, controller3]},
- *    }
- */
-moAttrs.parseScope = function(scopeElem) {
+
+moAttrs.parseAttrs = function(parseElem) {
   var ret = {renders: {}, controllers: [], obj: {}};
 
   var parseAttr = function(attrs, callback) {
     $.each(attrs, function(attrName, getHandler) {
-      var elems = scopeElem.querySelectorAll(attrSelector(attrName));
+      var elems = parseElem.querySelectorAll(attrSelector(attrName));
       $.each(elems, function(_, elem) {
         var attrValue = elem.getAttribute(attrName);
         var h = getHandler.call(elem, attrValue);
@@ -66,6 +55,69 @@ moAttrs.parseScope = function(scopeElem) {
   parseAttr(this._controlAttrs, function(handler) {
     ret.controllers.push(handler);
   });
+  return ret;
+};
+
+
+moAttrs.parseIterAttrs = function(iterElem) {
+  var iterAttrValue = iterElem.getAttribute(ITER_ATTR);
+  var ret = {renders: {}, controllers: [], obj: {}};
+  var container = iterElem.parentElement;
+  ret.obj[iterAttrValue] = [];
+
+  iterElem.removeAttribute(ITER_ATTR);
+
+  var attrRender = moAttrs.parseAttrs(iterElem);
+
+  ret.renders[iterAttrValue] = [function(scope) {
+    var data = scope[iterAttrValue];
+
+    container.innerHTML = '';
+    $.each(data, function(i, value) {
+      var newElem = iterElem.cloneNode(true);
+      $.each(attrRender.renders, function(_, renders) {
+        $.each(renders, function(_, render) {
+          render($.extend(scope, {$index: i, $$: value}), newElem);
+        });
+      });
+      container.appendChild(newElem);
+    });
+  }];
+  return ret;
+};
+
+
+/**
+ * parseScope 解析DOM中有mo-scope标签元素中的mo-开头标签的元素
+ * @param  DOMElement scopeElem scope对象
+ * @return Object
+ *    {
+ *      obj: {}, // 解析出来的Scope具有的元素
+ *      // 渲染DOM对象的函数，该种函数不能修改Scope对象的值
+ *      renders: {"scope.prop": [render1, render2, render3]},
+ *      // 可以改变Scope对象值得函数，比如mo-click等事件函数
+ *      controllers: {"scope.prop": [controller1, controller2, controller3]},
+ *    }
+ */
+moAttrs.parseScope = function(scopeElem) {
+  var ret = {renders: {}, controllers: [], obj: {}};
+
+  var extendObj = function(o) {
+    $.extend(true, ret.renders, o.renders);
+    ret.controllers = ret.controllers.concat(o.controllers || []);
+    $.extend(true, ret.obj, o.obj);
+  };
+
+  var iterElem, iterObj;
+  while (1) {
+    iterElem = scopeElem.querySelector(attrSelector(ITER_ATTR));
+    if ( !iterElem ) { break; }
+    iterObj = moAttrs.parseIterAttrs(iterElem);
+    iterObj && extendObj(iterObj);
+  }
+
+  var attrObj = moAttrs.parseAttrs(scopeElem);
+  attrObj && extendObj(attrObj);
   return ret;
 };
 
@@ -94,8 +146,9 @@ moAttrs.genControllerObj = function(names, handle) {
 
 moAttrs.addRenderAttr = function(attrName, attrender) {
   this._renderAttrs[attrName] = function(str) {
-    var elem = this, render = tmpl.render(str);
-    return moAttrs.genRenderObj(render.names, function(scope) {
+    var initElem = this, render = tmpl.render(str);
+    return moAttrs.genRenderObj(render.names, function(scope, elem) {
+      elem = elem || initElem;
       attrender(elem, scope, render.handle);
     });
   };
@@ -103,8 +156,9 @@ moAttrs.addRenderAttr = function(attrName, attrender) {
 
 moAttrs.addControlAttr = function(attrName, attrcontrol) {
   this._controlAttrs[attrName] = function(str) {
-    var elem = this, control = tmpl.control(str);
-    return moAttrs.genControllerObj(control.names, function(scope) {
+    var initElem = this, control = tmpl.control(str);
+    return moAttrs.genControllerObj(control.names, function(scope, elem) {
+      elem = elem || initElem;
       attrcontrol(elem, scope, control.handle);
     });
   };
@@ -148,28 +202,6 @@ moAttrs.addRenderAttr(mo('show'), function(elem, scope, renderHandle) {
 });
 
 
-// moAttrs._renderAttrs[ITER_ATTR] = function(str) {
-//   var elem = this, render = tmpl.render(str);
-//   var filterName = elem.getAttribute(ITER_FILTER_ATTR);
-//   function parseIterElemAttrs(iterElem) {
-//     $.each(moAttrs._renderAttrs, function(attrName, genHandler) {
-//       elem.querySelectorAll(attrSelector(attrName));
-//     });
-//   }
-//   var iterElem = elem.children[0];
-//   var iterObj = parseIterElemAttrs(iterElem);
-//   // var subiters = iterElem.querySelectorAll(attrSelector(ITER_ATTR));
-//   elem.removeChild(iterElem);
-//   return moAttrs.genRenderObj(render.names, function(scope) {
-//     var filter = scope[filterName],
-//         data = scope[render.names[0]];
-//     data = filter ? filter(data) : data;
-//     for (var i = 0; i < data.length; i++) {
-//     }
-//   });
-// };
-
-
 /*
  * Control attributes.
  */
@@ -211,5 +243,6 @@ moAttrs._controlAttrs[mo('bind')] = function(str) {
     });
   });
 };
+
 
 exports.moAttrs = moAttrs;
