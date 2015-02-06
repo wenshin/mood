@@ -63,21 +63,24 @@ moAttrs.parseIterAttrs = function(iterElem) {
   var iterAttrValue = iterElem.getAttribute(ITER_ATTR);
   var ret = {renders: {}, controllers: [], obj: {}};
   var container = iterElem.parentElement;
-  ret.obj[iterAttrValue] = [];
 
+  ret.obj[iterAttrValue] = [];
   iterElem.removeAttribute(ITER_ATTR);
 
-  var attrRender = moAttrs.parseAttrs(iterElem);
+  // iterElem 的子标签的属性会在其他地方被去掉，所以这里克隆一份。
+  var cloneIterElem = iterElem.cloneNode(true);
 
   ret.renders[iterAttrValue] = [function(scope) {
     var data = scope[iterAttrValue];
 
     container.innerHTML = '';
+
     $.each(data, function(i, value) {
-      var newElem = iterElem.cloneNode(true);
+      var newElem = cloneIterElem.cloneNode(true);
+      var attrRender = moAttrs.parseAttrs(newElem);
       $.each(attrRender.renders, function(_, renders) {
         $.each(renders, function(_, render) {
-          render($.extend(scope, {$index: i, $$: value}), newElem);
+          render($.extend(scope, {$index: i, $$: value}));
         });
       });
       container.appendChild(newElem);
