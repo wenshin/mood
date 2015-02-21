@@ -102,6 +102,8 @@ moAttrs._parseIterAttrs = function(iterElem) {
     $.each(data, function(i, value) {
       var newElem = cloneIterElem.cloneNode(true);
 
+      // 这里没有使用 moAttrs.parseScope，因为这里需要把
+      // mo-repeat标签完全解析后生成所有的新DOM元素才解析parseAttrs
       var iter = moAttrs.parseIterAttrs(newElem);
       $.each(iter.renders, function(key, renders) {
         $.each(renders, function(_, render) {
