@@ -7,17 +7,29 @@ require( ['mood'], function(mood) {
   'use strict';
 
   // 不设置Scope的初始值
-  // mood.Mood.config({bootstrap: true});
+  mood.Mood.config({debug: true});
 
 
   // 设置Scope的初始值
   mood.Mood.bootstrap({
-    'myscope': { show: true, count: 0 },
-    'myscope1': { lowPrice: 0, buyPrice: 0, highPrice: 0 },
+    'myscope': {
+      show: true,
+      count: 0,
+      people: [
+        {name: 'wenshin', location: 'beijing', tags: [{ click: 10, names: ['tag1', 'tag2']}] },
+        {name: 'yanwx', location: 'zhejiang', tags: [{ click: 12, names: ['tag3', 'tag4']}] }],
+    },
+    'myscope1': {
+      lowPrice: 0, buyPrice: 0, highPrice: 0},
   });
 
-  var myScope1 = mood.Mood.getScope('myscope1'),
+  var myScope = mood.Mood.getScope('myscope'),
+      myScope1 = mood.Mood.getScope('myscope1'),
       triggerProps = ['lowPrice', 'buyPrice', 'highPrice'];
+
+  myScope.helper('multi2', function(num) {
+    return num * 2;
+  });
 
   myScope1.helper('vibrate', function(rate) {
     var lowPrice = this.lowPrice,
@@ -37,5 +49,11 @@ require( ['mood'], function(mood) {
     if ( !buyPrice ) { return 0; }
     return this.floatFormat((price - buyPrice) / buyPrice * 100, 2);
   }, ['price', 'buyPrice']);
+
+  myScope1.helper('lossEarn', function() {
+    var price = this.lossPrice, buyPrice = this.buyPrice;
+    if ( !buyPrice ) { return 0; }
+    return this.floatFormat((price - buyPrice) / buyPrice * 100, 2);
+  }, ['lossPrice', 'buyPrice']);
 
 });

@@ -11,8 +11,25 @@
     <div mo-id="{> count }" mo-html="The Count is {> multi2(count) } :)!" mo-show="{> show }">Click Button to add 1!</div>
     <!-- <button mo-click="$> count++">Click</button> -->
     <button mo-click="$> count++">Click</button>
-    <button mo-click="$> count = 0">Reset</button>
+    <button mo-click="$> count=0">Reset</button>
     <button mo-click="$> !show " mo-html="{> show ? 'Hide' : 'Show' }">Hide</button>
+    <ul>
+      <li mo-repeat="people" mo-filter="$> sortSome">
+        <span mo-text="{> $index }"></span>
+        <span mo-text="{> $$.name }"></span>
+        <span mo-text="{> $$.location }"></span>
+        <ul>
+          <li mo-repeat="$$.tags">
+            <span mo-text="点击次数{> $$.click }"></span>
+            <ul>
+              <li mo-repeat="$$.names">
+                <span mo-text="{> $index }, {> $$ }"></span>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
   </div>
   <form mo-scope="myscope1">
     <h2>回撤计算</h2>
@@ -24,12 +41,16 @@
     <input type="text" mo-bind="$> buyPrice" mo-bind-parse="toFloat">
     <label>现价</label>
     <input type="text" mo-bind="$> price" mo-bind-parse="toFloat">
+    <label>止损价</label>
+    <input type="text" mo-bind="$> lossPrice" mo-bind-parse="toFloat">
     <h3>当前盈利</h3>
     <p><span mo-html="{> nowEarn() }"></span>%</p>
+    <h3>止损盈利</h3>
+    <p><span mo-html="{> lossEarn() }"></span>%</p>
     <h3>下行低位向上回撤</h3>
-    <p>+32%：
-      <span mo-html="{> vibrate(0.32) }"></span>元。
-      参考盈利：<span mo-html="{> earn(0.32)}"></span>%。
+    <p>+38%：
+      <span mo-html="{> vibrate(0.38) }"></span>元。
+      参考盈利：<span mo-html="{> earn(0.38)}"></span>%。
     </p>
     <p>+50%：
       <span mo-html="{> vibrate(0.50) }"></span>元。
@@ -40,9 +61,9 @@
       参考盈利：<span mo-html="{> earn(0.62)}"></span>%。
     </p>
     <h3>上行高位向下回撤</h3>
-    <p>-32%：
-      <span mo-html="{> vibrate(-0.32) }"></span>元。
-      参考盈利：<span mo-html="{> earn(-0.32)}"></span>%。
+    <p>-38%：
+      <span mo-html="{> vibrate(-0.38) }"></span>元。
+      参考盈利：<span mo-html="{> earn(-0.38)}"></span>%。
     </p>
     <p>-50%：
       <span mo-html="{> vibrate(-0.50) }"></span>元。
@@ -53,9 +74,6 @@
       参考盈利：<span mo-html="{> earn(-0.62)}"></span>%。
     </p>
   </form>
-  <ul>
-    <li mo-each=""></li>
-  </ul>
   </header>
 </body>
 </html>
