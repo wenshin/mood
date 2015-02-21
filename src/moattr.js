@@ -59,7 +59,25 @@ moAttrs.parseAttrs = function(parseElem) {
 };
 
 
-moAttrs.parseIterAttrs = function(iterElem) {
+var extendObj = function(target, src) {
+  $.extend(true, target.renders, src.renders);
+  target.controllers = target.controllers.concat(src.controllers || []);
+  $.extend(true, target.obj, src.obj);
+};
+
+moAttrs.parseIterAttrs = function(scopeElem) {
+  var iterObj, iterElem;
+  var ret = {renders: {}, controllers: [], obj: {}};
+  while (1) {
+    iterElem = scopeElem.querySelector(attrSelector(ITER_ATTR));
+    if ( !iterElem ) { break; }
+    iterObj = moAttrs._parseIterAttrs(iterElem);
+    iterObj && extendObj(ret, iterObj);
+  }
+  return ret;
+};
+
+moAttrs._parseIterAttrs = function(iterElem) {
   var iterAttrValue = iterElem.getAttribute(ITER_ATTR);
   var ret = {renders: {}, controllers: [], obj: {}};
   var container = iterElem.parentElement;
@@ -69,26 +87,42 @@ moAttrs.parseIterAttrs = function(iterElem) {
 
   // iterElem 的子标签的属性会在其他地方被去掉，所以这里克隆一份。
   var cloneIterElem = iterElem.cloneNode(true);
+  $.each(iterElem.querySelectorAll(attrSelector(ITER_ATTR)), function(_, elem) {
+    elem.removeAttribute(ITER_ATTR);
+  });
 
-  ret.renders[iterAttrValue] = [function(scope) {
-    var data = scope[iterAttrValue];
-
+  function iterRender(scope) {
+    var data;
+    if ( iterAttrValue.indexOf('$$.') !== -1 ) {
+      data = scope.$$[iterAttrValue.replace('$$.', '')];
+    } else {
+      data = scope[iterAttrValue];
+    }
     container.innerHTML = '';
-
     $.each(data, function(i, value) {
       var newElem = cloneIterElem.cloneNode(true);
-      var attrRender = moAttrs.parseAttrs(newElem);
-      $.each(attrRender.renders, function(_, renders) {
+
+      var iter = moAttrs.parseIterAttrs(newElem);
+      $.each(iter.renders, function(key, renders) {
         $.each(renders, function(_, render) {
           render($.extend(scope, {$index: i, $$: value}));
         });
       });
+
+      var attrRender = moAttrs.parseAttrs(newElem);
+      $.each(attrRender.renders, function(key, renders) {
+        $.each(renders, function(_, render) {
+          render($.extend(scope, {$index: i, $$: value}));
+        });
+      });
+
       container.appendChild(newElem);
     });
-  }];
+  }
+
+  ret.renders[iterAttrValue] = [iterRender];
   return ret;
 };
-
 
 /**
  * parseScope 解析DOM中有mo-scope标签元素中的mo-开头标签的元素
@@ -105,22 +139,12 @@ moAttrs.parseIterAttrs = function(iterElem) {
 moAttrs.parseScope = function(scopeElem) {
   var ret = {renders: {}, controllers: [], obj: {}};
 
-  var extendObj = function(o) {
-    $.extend(true, ret.renders, o.renders);
-    ret.controllers = ret.controllers.concat(o.controllers || []);
-    $.extend(true, ret.obj, o.obj);
-  };
-
-  var iterElem, iterObj;
-  while (1) {
-    iterElem = scopeElem.querySelector(attrSelector(ITER_ATTR));
-    if ( !iterElem ) { break; }
-    iterObj = moAttrs.parseIterAttrs(iterElem);
-    iterObj && extendObj(iterObj);
-  }
+  var iterObj;
+  iterObj = moAttrs.parseIterAttrs(scopeElem);
+  extendObj(ret, iterObj);
 
   var attrObj = moAttrs.parseAttrs(scopeElem);
-  attrObj && extendObj(attrObj);
+  attrObj && extendObj(ret, attrObj);
   return ret;
 };
 
